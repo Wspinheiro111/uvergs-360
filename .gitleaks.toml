@@ -1,0 +1,44 @@
+# =============================================================================
+# UVERGS 360 — Gitleaks Configuration
+# Detecta segredos antes que entrem no repositório
+# =============================================================================
+
+title = "UVERGS 360 - Secret Scan"
+
+[extend]
+# Usar ruleset padrão do gitleaks como base
+useDefault = true
+
+[[rules]]
+id = "uvergs-api-key"
+description = "UVERGS 360 API Key"
+regex = '''uvergs360_[a-zA-Z0-9]{20,}'''
+tags = ["api-key", "uvergs360"]
+
+[[rules]]
+id = "database-url-with-password"
+description = "Database URL com senha"
+regex = '''(postgresql|postgres)://[^:]+:[^@]{6,}@'''
+tags = ["database", "password"]
+
+[[rules]]
+id = "neon-connection-string"
+description = "Neon PostgreSQL connection string"
+regex = '''postgresql://[^:]+:[^@]+@ep-[a-zA-Z0-9-]+\.neon\.tech'''
+tags = ["database", "neon"]
+
+[allowlist]
+description = "Allowlist para padrões falso-positivos"
+paths = [
+  ".env.example",        # arquivo de exemplo — valores fictícios
+  "docs/",               # documentação
+  ".github/workflows/",  # apenas referências a secrets do GitHub
+]
+regexes = [
+  "GERAR_COM_OPENSSL_RAND_HEX_32",  # placeholder de exemplo
+  "uvergs360_test_secret",           # senha de dev/teste documentada
+  "uvergs360_minio_secret",          # senha MinIO de dev
+  "uvergs360_redis_secret",          # senha Redis de dev
+  "re_xxxxxxxxxxxx",                  # placeholder Resend
+  "ep-xxxx",                          # placeholder Neon
+]
