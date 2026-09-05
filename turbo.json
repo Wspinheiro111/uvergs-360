@@ -1,10 +1,26 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "DATABASE_URL_SERVICE",
+        "REDIS_URL",
+        "AUTH_SECRET",
+        "NEXTAUTH_URL",
+        "NEXTAUTH_SECRET",
+        "SIGNED_LINK_SECRET",
+        "TOTP_ENCRYPTION_KEY",
+        "RESEND_API_KEY",
+        "EMAIL_FROM_NAME",
+        "EMAIL_FROM_ADDRESS",
+        "STORAGE_ENDPOINT",
+        "STORAGE_ACCESS_KEY",
+        "STORAGE_SECRET_KEY",
+        "NODE_ENV"
+      ]
     },
     "dev": {
       "cache": false,

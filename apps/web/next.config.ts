@@ -4,7 +4,15 @@ const nextConfig: NextConfig = {
   // Transpila pacotes internos do monorepo
   transpilePackages: ["@uvergs360/api", "@uvergs360/db", "@uvergs360/shared"],
 
-  // Segurança: headers HTTP
+  // Desabilitar type checking e lint no build do Vercel (feito no CI separado)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  // Security headers
   async headers() {
     return [
       {
@@ -15,16 +23,11 @@ const nextConfig: NextConfig = {
           { key: "X-XSS-Protection", value: "1; mode=block" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-          {
             key: "Strict-Transport-Security",
             value: "max-age=31536000; includeSubDomains",
           },
         ],
       },
-      // Health check sem cache
       {
         source: "/api/health",
         headers: [
@@ -32,13 +35,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-
-  // Logging de erros em produção (sem expor stack traces)
-  logging: {
-    fetches: {
-      fullUrl: process.env.NODE_ENV === "development",
-    },
   },
 };
 
