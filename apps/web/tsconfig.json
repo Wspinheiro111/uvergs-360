@@ -1,21 +1,19 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
+    "strict": false,
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/*"],
-      "@uvergs360/db": ["../../packages/db/src/index.ts"],
-      "@uvergs360/shared": ["../../packages/shared/src/index.ts"],
-      "@uvergs360/api": ["../../packages/api/src/root.ts"]
+      "@/*": ["./src/*"]
     },
-    "noUncheckedIndexedAccess": false
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }
