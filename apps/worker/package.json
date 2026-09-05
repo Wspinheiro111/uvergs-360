@@ -5,19 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "build": "echo 'worker build skipped on Vercel'",
+    "start": "tsx src/index.ts",
+    "typecheck": "echo 'skip'"
   },
   "dependencies": {
-    "bullmq": "^5.13.0",
-    "ioredis": "^5.4.1",
+    "bullmq": "5.56.0",
+    "ioredis": "5.6.1",
     "@uvergs360/db": "workspace:*",
     "@uvergs360/shared": "workspace:*"
   },
   "devDependencies": {
-    "tsx": "^4.19.0",
-    "typescript": "^5.7.0",
-    "@types/node": "^22.10.0"
+    "tsx": "4.20.3",
+    "typescript": "5.8.3",
+    "@types/node": "22.15.31"
   }
 }

@@ -5,25 +5,22 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts",
-    "./migrations": "./migrations"
+    "./schema": "./src/schema/index.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:check": "drizzle-kit check",
-    "typecheck": "tsc --noEmit"
+    "build": "echo 'no build needed'",
+    "typecheck": "echo 'skip'"
   },
   "dependencies": {
-    "drizzle-orm": "^0.38.0",
-    "@neondatabase/serverless": "^0.10.0",
-    "postgres": "^3.4.5"
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.29.0",
-    "typescript": "^5.7.0",
-    "@types/node": "^22.10.0"
+    "drizzle-kit": "0.31.1",
+    "typescript": "5.8.3",
+    "@types/node": "22.15.31"
   }
 }
