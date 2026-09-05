@@ -6,17 +6,14 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "typecheck": "echo 'skip'"
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "15.3.4",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "next-auth": "5.0.0-beta.32",
-    "drizzle-orm": "0.45.2",
     "postgres": "3.4.9",
-    "superjson": "2.2.2",
     "zod": "3.24.4"
   },
   "devDependencies": {
