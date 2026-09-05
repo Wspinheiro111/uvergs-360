@@ -1,6 +1,5 @@
 {
-  "buildCommand": "pnpm turbo run build --filter=@uvergs360/web",
   "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": "apps/web/.next",
-  "framework": "nextjs"
+  "buildCommand": "pnpm turbo run build --filter=@uvergs360/web",
+  "outputDirectory": "apps/web/.next"
 }
