@@ -62,3 +62,6 @@ tmp/
 # Certificados de desenvolvimento (SSL local)
 localhost.pem
 localhost-key.pem
+
+# Pastas temporárias de teste
+node_modules_test/
