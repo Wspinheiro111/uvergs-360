@@ -7,7 +7,6 @@ import {
   inet,
   index,
 } from "drizzle-orm/pg-core";
-import { tenants } from "./tenant.ts";
 
 // =============================================================================
 // AUDIT LOG — registro append-only de toda ação crítica

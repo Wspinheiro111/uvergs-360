@@ -6,12 +6,9 @@ import {
   timestamp,
   integer,
   inet,
-  jsonb,
   index,
   unique,
-  check,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { tenants } from "./tenant.ts";
 
 // =============================================================================

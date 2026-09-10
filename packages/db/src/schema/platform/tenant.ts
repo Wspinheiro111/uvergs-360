@@ -4,12 +4,9 @@ import {
   text,
   boolean,
   timestamp,
-  jsonb,
   index,
   unique,
-  pgSchema,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 // =============================================================================
 // TENANT — entidade raiz do isolamento multi-tenant
