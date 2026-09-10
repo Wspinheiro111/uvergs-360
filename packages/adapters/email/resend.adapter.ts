@@ -147,7 +147,11 @@ export class ResendEmailAdapter {
           "X-Correlation-Id": options.correlationId,
           "X-Tenant-Id": options.tenantId,
         },
-      } as any); // TODO(#101): tipagem completa de templates Resend
+      // TODO(#101): o SDK do Resend não tem tipo público para envio por
+      // template alias (é um recurso do dashboard, sem contrato TS). Tipar
+      // direito exige modelar o shape real da API de templates — fora do
+      // escopo de lint fix mecânico. Retirado do burn-down (prompt 02, §2).
+      } as any);
 
       if (error) {
         this.logError("send_template_error", options, error);

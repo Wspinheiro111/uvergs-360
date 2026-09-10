@@ -60,7 +60,7 @@ export async function runAuditTests({ sql, dbUrl, tenantId, userId }) {
           INSERT INTO audit_logs (tenant_id, user_id, correlation_id, action, module, entity_type, entity_id, outcome)
           VALUES ('${tenantId}', '${userId}', gen_random_uuid(), 'test.inject', 'platform', 'User', '${userId}', 'success')
         `);
-      } catch (e) {
+      } catch {
         rejeitou = true;
       }
       if (!rejeitou) throw new Error("app_user conseguiu INSERT em audit_logs — FALHA DE SEGURANÇA");

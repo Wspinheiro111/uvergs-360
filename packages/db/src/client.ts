@@ -14,12 +14,16 @@ import * as schema from "./schema/index.ts";
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL não definida.");
 }
+// TypeScript não estreita process.env através do guard acima porque é uma
+// leitura de módulo, não uma variável local — constante tipada resolve
+// sem non-null assertion.
+const DATABASE_URL: string = process.env.DATABASE_URL;
 
 // ---------------------------------------------------------------------------
 // APP CLIENT — para a API (RLS ativo)
 // Pool de conexões com pg-proxy para Neon serverless
 // ---------------------------------------------------------------------------
-const appSql = postgres(process.env.DATABASE_URL, {
+const appSql = postgres(DATABASE_URL, {
   max: 20,                    // pool máximo
   idle_timeout: 20,           // fechar conexões ociosas após 20s
   connect_timeout: 10,        // timeout de conexão 10s
@@ -44,7 +48,7 @@ if (!process.env.DATABASE_URL_SERVICE) {
 }
 
 const serviceSql = postgres(
-  process.env.DATABASE_URL_SERVICE ?? process.env.DATABASE_URL!,
+  process.env.DATABASE_URL_SERVICE ?? DATABASE_URL,
   {
     max: 5,
     idle_timeout: 30,

@@ -11,9 +11,9 @@
  * Nunca usar app_user role no worker.
  */
 
-import { Queue, Worker, QueueEvents } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
-import { withServiceRole, serviceDb } from "@uvergs360/db";
+import { withServiceRole } from "@uvergs360/db";
 import { outboxEvents } from "@uvergs360/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { generateCorrelationId } from "@uvergs360/shared";
@@ -193,8 +193,8 @@ export const auditWorker = new Worker(
   QUEUES.AUDIT_LOG,
   async (job) => {
     const { data } = job;
-    await withServiceRole(async (db) => {
-      // TODO(#60): INSERT em audit_logs via service_role
+    await withServiceRole(async (_db) => {
+      // TODO(#60): INSERT em audit_logs via service_role — usar _db quando implementado
       // Implementação completa em F0/audit
       log("info", "audit.log.written", {
         action: data.action,

@@ -8,7 +8,7 @@
  */
 
 import postgres from "postgres";
-import { createHash, randomBytes, pbkdf2Sync } from "crypto";
+import { randomBytes, pbkdf2Sync } from "crypto";
 
 const DB_URL = process.env.DATABASE_URL ??
   "postgresql://uvergs360:uvergs360_dev_secret@localhost:5432/uvergs360_dev";

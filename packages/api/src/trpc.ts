@@ -2,13 +2,6 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import type { TRPCContext } from "./context/index.ts";
-import {
-  AccessScope,
-  ForbiddenError,
-  UnauthorizedError,
-  FeatureFlagDisabledError,
-} from "@uvergs360/shared";
-
 // =============================================================================
 // INIT tRPC
 // =============================================================================
@@ -123,8 +116,8 @@ interface AuditOptions {
   requireJustification?: boolean;
 }
 
-export function withAudit(options: AuditOptions) {
-  return t.middleware(async ({ ctx, input, next }) => {
+export function withAudit(_options: AuditOptions) {
+  return t.middleware(async ({ ctx, next }) => {
     const result = await next({ ctx });
 
     if (ctx.user && result.ok) {

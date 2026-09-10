@@ -2,8 +2,15 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+interface ServiceStatus {
+  name: string;
+  status: "ok" | "down" | "degraded";
+  latencyMs?: number;
+  error?: string;
+}
+
 export async function GET() {
-  const services: any[] = [];
+  const services: ServiceStatus[] = [];
   const start = Date.now();
 
   try {

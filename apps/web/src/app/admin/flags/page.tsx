@@ -38,7 +38,10 @@ const CATEGORY_COLORS: Record<FeatureFlag["category"], string> = {
 export default function FeatureFlagsPage() {
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [loading, setLoading] = useState(true);
-  const [toggling, setToggling] = useState<string | null>(null);
+  // setToggling ainda não é chamado — o toggle real (mutation tRPC) entra
+  // quando o backend estiver conectado. O estado já existe para o disabled
+  // visual do botão funcionar desde já.
+  const [toggling, _setToggling] = useState<string | null>(null);
 
   // Carregar flags via tRPC
   useEffect(() => {
@@ -117,8 +120,8 @@ export default function FeatureFlagsPage() {
   }, []);
 
   const groupedFlags = flags.reduce<Record<string, FeatureFlag[]>>((acc, flag) => {
-    if (!acc[flag.category]) acc[flag.category] = [];
-    acc[flag.category]!.push(flag);
+    const bucket = acc[flag.category] ?? (acc[flag.category] = []);
+    bucket.push(flag);
     return acc;
   }, {});
 

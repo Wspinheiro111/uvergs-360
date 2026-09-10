@@ -39,7 +39,7 @@ export async function runLevel1({ sql, withContext, tenantAId, tenantBId, userA1
           VALUES (${tenantBId}, 'INJECTION_ATTEMPT', true, 'Cross-tenant injection')
         `
       );
-    } catch (e) {
+    } catch {
       rejeitou = true;
     }
     if (!rejeitou) throw new Error("Deveria ter rejeitado o INSERT cross-tenant");

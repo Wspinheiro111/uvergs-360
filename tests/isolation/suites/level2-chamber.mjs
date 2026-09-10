@@ -31,7 +31,7 @@ export async function runLevel2({ sql, withContext, tenantAId, tenantBId, userA1
       await withContext(tenantAId, userA1Id, async (ctx) =>
         ctx`UPDATE audit_logs SET outcome = 'failure' WHERE id = ${inserted.id}`
       );
-    } catch (e) {
+    } catch {
       rejeitou = true;
     }
     if (!rejeitou) throw new Error("app_user conseguiu UPDATE em audit_logs — FALHA DE SEGURANÇA");
@@ -56,7 +56,7 @@ export async function runLevel2({ sql, withContext, tenantAId, tenantBId, userA1
       await withContext(tenantAId, userA1Id, async (ctx) =>
         ctx`DELETE FROM audit_logs WHERE id = ${inserted.id}`
       );
-    } catch (e) {
+    } catch {
       rejeitou = true;
     }
     if (!rejeitou) throw new Error("app_user conseguiu DELETE em audit_logs — FALHA DE SEGURANÇA");
@@ -104,7 +104,7 @@ export async function runLevel2({ sql, withContext, tenantAId, tenantBId, userA1
           VALUES (${tenantBId}, 'Test', gen_random_uuid(), 'test', '{}', ${key}, 'emailSend')
         `
       );
-    } catch (e) {
+    } catch {
       rejeitou = true;
     }
     if (!rejeitou) throw new Error("app_user inseriu outbox com tenant_id diferente");
