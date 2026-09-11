@@ -204,7 +204,7 @@ jobs:
           DATABASE_URL: postgresql://uvergs360:uvergs360_test_secret@localhost:5433/uvergs360_test
 
       - name: Executar testes de isolamento (Nível 1 — Tenant)
-        run: pnpm vitest run tests/isolation/vitest --reporter=verbose
+        run: pnpm vitest run tests/isolation/vitest --reporter=verbose --no-file-parallelism
 
       - name: Upload relatório de isolamento
         if: always()
