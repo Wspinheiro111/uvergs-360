@@ -1,82 +1,45 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { auth } from "@/lib/auth";
 
-const navItems = [
-  { href: "/admin", label: "Início", icon: "🏠" },
-  { href: "/admin/flags", label: "Feature Flags", icon: "🚩" },
-  { href: "/admin/users", label: "Usuários", icon: "👥" },
-  { href: "/admin/audit", label: "Auditoria", icon: "📋" },
-];
+import { AdminShell } from "./_components/AdminShell";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
-  const pathname = usePathname();
+}>) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login?callbackUrl=/admin");
+  }
+
+  const roles = (session as typeof session & { roles?: string[] }).roles ?? [];
+  const canAccessAdmin = roles.some((role) =>
+    ["admin_global", "presidency", "audit_read"].includes(role)
+  );
+
+  if (!canAccessAdmin) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-sm font-semibold text-red-700">Acesso restrito</p>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Área administrativa</h1>
+          <p className="mt-3 text-sm leading-relaxed text-slate-600">
+            Seu usuário está autenticado, mas não possui um perfil administrativo autorizado.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
-      {/* Sidebar */}
-      <aside className="w-60 bg-[#1a3a6e] text-white flex flex-col shrink-0">
-        {/* Logo */}
-        <div className="p-5 border-b border-blue-800">
-          <p className="text-xs font-bold tracking-widest text-blue-300 uppercase">
-            UVERGS 360
-          </p>
-          <p className="text-xs text-blue-400 mt-0.5">Gestão Institucional</p>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 p-3 space-y-0.5">
-          {navItems.map((item) => {
-            const active = pathname === item.href ||
-              (item.href !== "/admin" && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                  ${active
-                    ? "bg-white/15 text-white"
-                    : "text-blue-200 hover:bg-white/10 hover:text-white"
-                  }
-                `}
-              >
-                <span className="text-base">{item.icon}</span>
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-blue-800">
-          <p className="text-xs text-blue-400">W9 Sistemas · v0.1.0-F0</p>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
-        <header className="h-14 bg-white border-b border-slate-200 flex items-center px-6 shrink-0">
-          <div className="flex-1" />
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">A</span>
-            </div>
-            <span className="text-sm text-slate-600">Administrador</span>
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
-      </div>
-    </div>
+    <AdminShell
+      displayName={session.user.name ?? "Usuário"}
+      email={session.user.email ?? undefined}
+    >
+      {children}
+    </AdminShell>
   );
 }

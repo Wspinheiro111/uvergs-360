@@ -58,18 +58,25 @@
 - [x] Nonce UNIQUE impede replay em signed_access_links
 - [x] Sessão expirada e revogada rejeitadas na consulta de validação
 - [x] Flags VAL-LEGAL: bloqueio de habilitação sem approval_document
+- [x] Rotas `/admin` protegidas no servidor por sessão Auth.js
+- [x] callbackUrl do login restrito à área administrativa interna
 
 ### API (tRPC)
 - [x] Contexto tRPC (auth, tenant, correlationId)
 - [x] Middleware: auth, 2FA, feature flag, audit
 - [x] Router: featureFlags (list, isEnabled, toggle, approveValLegal)
 
-### Frontend (Next.js 15)
+### Frontend (Next.js 16)
 - [x] /api/health (PostgreSQL + Redis + Storage)
-- [x] /login (credentials + 2FA TOTP)
-- [x] /admin/flags (feature flags admin)
+- [x] /login com credenciais (fluxo TOTP ainda pendente)
+- [x] /admin com indicadores reais do tenant
+- [x] /admin/flags com consulta real e alterações sensíveis bloqueadas
+- [x] /admin/users com busca, filtro, status, roles e sinais de segurança
+- [x] /admin/audit com busca e filtros sobre o log append-only
 - [x] next.config.ts (security headers)
-- [x] Auth.js v5 (JWT, brute force, TOTP, eventos auditados)
+- [x] Auth.js v5 (credentials + JWT + proteção contra brute force)
+- [x] Layout administrativo autenticado, restrito por role e com encerramento explícito de sessão
+- [x] Typecheck do aplicativo web incluído no pipeline do monorepo
 
 ### Worker (BullMQ)
 - [x] Filas definidas (outbox, email, audit, certificate, dlq)
@@ -94,6 +101,7 @@
 
 - [ ] Auth.js login funcional end-to-end (requer Next.js dev server)
 - [ ] 2FA TOTP end-to-end com otplib (requer app de autenticador)
+- [ ] Mutações administrativas de usuários e feature flags (mantidas somente leitura até o 2FA do app)
 - [ ] /api/health HTTP 200 real (requer `next dev` rodando)
 - [ ] CI/CD GitHub Actions passando (requer repositório GitHub)
 - [ ] Deploy Vercel staging (requer VERCEL_TOKEN)
@@ -109,9 +117,8 @@
 ---
 
 ## F1–F7 (Próximas fases)
-**Bloqueado até Gate F0 GO completo.**
+**Desenvolvimento incremental iniciado nas consultas administrativas. Módulos transacionais continuam condicionados aos gates aplicáveis.**
 
 Dependências liberadas pelo Gate F0 (banco):
 - Migrations de produto (F1+) → ✅ RLS e roles prontos
 - Qualquer endpoint de API → ✅ Auth + tenant middleware prontos
-

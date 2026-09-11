@@ -7,10 +7,10 @@ W9 Sistemas · Santo Ângelo/RS · Setembro 2026
 
 ## Stack
 
-- **Frontend:** Next.js 15 App Router + Tailwind CSS
+- **Frontend:** Next.js 16 App Router + Tailwind CSS
 - **API:** tRPC 11
 - **Banco:** PostgreSQL 16 + pgvector (Neon) + RLS multi-tenant
-- **Auth:** Auth.js v5 + 2FA TOTP
+- **Auth:** Auth.js v5; 2FA TOTP em implementação
 - **Filas:** BullMQ 5 + Redis 7
 - **Email:** Resend
 - **Deploy:** Vercel

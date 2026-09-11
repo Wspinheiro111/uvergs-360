@@ -1322,7 +1322,7 @@ ON CONFLICT (tenant_id, name) DO UPDATE SET display_name = EXCLUDED.display_name
 -- TROCAR EM PRODUÇÃO
 INSERT INTO users (tenant_id, email, email_verified, display_name, password_hash, status, locale, timezone)
 SELECT id, 'admin@uvergs360.dev', true, 'Administrador (Dev)',
-  'pbkdf2:8f3a2b1c9d4e5f60718293a4b5c6d7e8:c4a8f2e1b7d3956028f4e7a1c5b9d2836f4a7e1c9b5d3827f6a4e2c8b1d5937a4f8e2c6b9d1537a8e4c2f6b9d3517a8e4c2f6b9d35',
+  'pbkdf2:c4f5419d785282b509837cc9a1fe7cd6:771efe4e594d3a4be5601f95c4218ed4c05c8c5d26c36bf898c0a05564244e9e31481b5756c2a5feec5e7ddd1569ff359c1d63c710db3104500a101bf8760197', -- corrigido: era um valor de exemplo inventado, nunca batia com 'Admin@360Dev!'
   'active', 'pt-BR', 'America/Sao_Paulo'
 FROM tenants WHERE slug = 'uvergs'
 ON CONFLICT (email, tenant_id) DO UPDATE SET display_name = EXCLUDED.display_name;

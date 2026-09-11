@@ -4,10 +4,12 @@ import { useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { getSafeAuthenticatedPath } from "@/lib/navigation";
+
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/admin";
+  const callbackUrl = getSafeAuthenticatedPath(searchParams.get("callbackUrl"));
 
   const [step, setStep] = useState<"credentials" | "2fa">("credentials");
   const [form, setForm] = useState({ tenantSlug: "", email: "", password: "" });

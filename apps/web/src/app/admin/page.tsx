@@ -1,120 +1,89 @@
 import Link from "next/link";
 
-// Dashboard principal do admin — Gate F0
-export default function AdminPage() {
-  const cards = [
+import { loadAdminOverview } from "@/lib/admin-data";
+
+import { DataNotice } from "./_components/DataNotice";
+
+interface ModuleCardProps {
+  title: string;
+  description: string;
+  href: string;
+  icon: string;
+  badge: string;
+  external?: boolean;
+}
+
+function ModuleCard({ title, description, href, icon, badge, external }: ModuleCardProps) {
+  return (
+    <Link
+      href={href}
+      target={external ? "_blank" : undefined}
+      className="block rounded-xl border border-slate-200 bg-white p-6 transition-all hover:border-blue-300 hover:shadow-md"
+    >
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <span className="text-3xl" aria-hidden="true">{icon}</span>
+        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">{badge}</span>
+      </div>
+      <h2 className="font-semibold text-slate-900">{title}</h2>
+      <p className="mt-1 text-sm leading-relaxed text-slate-500">{description}</p>
+    </Link>
+  );
+}
+
+export default async function AdminPage() {
+  const result = await loadAdminOverview();
+  const overview = result.data;
+  const cards: ModuleCardProps[] = [
     {
-      title: "Feature Flags",
-      description: "Controle de funcionalidades por tenant. Flags VAL-LEGAL desligadas por padrão.",
+      title: "Feature flags",
+      description: "Consulte o estado real das funcionalidades e suas aprovações.",
       href: "/admin/flags",
       icon: "🚩",
-      status: "ok",
-      badge: "6 flags ativas",
+      badge: overview ? `${overview.enabledFlags}/${overview.totalFlags} ativas` : "Consultar",
     },
     {
-      title: "Usuários & Roles",
-      description: "Gerenciamento de usuários, perfis e permissões. 2FA obrigatório para roles sensíveis.",
+      title: "Usuários e perfis",
+      description: "Consulte contas, perfis atribuídos, status e configuração de segurança.",
       href: "/admin/users",
       icon: "👥",
-      status: "f1",
-      badge: "Disponível em F1",
+      badge: overview ? `${overview.activeUsers}/${overview.users} ativos` : "Consultar",
     },
     {
       title: "Auditoria",
-      description: "Registro append-only de todas as ações críticas. Correlação por requisição.",
+      description: "Pesquise ações críticas por módulo, resultado, usuário ou e-mail.",
       href: "/admin/audit",
       icon: "📋",
-      status: "f1",
-      badge: "Disponível em F1",
+      badge: overview ? `${overview.auditEvents24h} nas últimas 24h` : "Consultar",
     },
     {
-      title: "Health Check",
-      description: "Status do banco, Redis e storage em tempo real.",
+      title: "Saúde dos serviços",
+      description: "Verifique banco, cache e armazenamento usados pelo ambiente atual.",
       href: "/api/health",
       icon: "💚",
-      status: "ok",
-      badge: "Disponível",
+      badge: "Verificar agora",
       external: true,
     },
   ];
 
   return (
-    <div className="p-8">
-      {/* Header */}
+    <div className="mx-auto max-w-6xl p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-slate-800">
-          Painel Administrativo
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          UVERGS 360 · Fase F0 — Fundação e Segurança
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">Visão operacional</p>
+        <h1 className="mt-2 text-3xl font-semibold text-slate-900">Painel administrativo</h1>
+        <p className="mt-2 text-sm text-slate-500">Dados do tenant autenticado, atualizados a cada acesso.</p>
+      </div>
+
+      {result.error && <div className="mb-6"><DataNotice message={result.error} /></div>}
+
+      <div className="mb-8 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+        <p className="font-semibold text-emerald-900">Núcleo administrativo disponível</p>
+        <p className="mt-1 text-sm text-emerald-800">
+          Usuários, auditoria e feature flags já usam dados reais. Operações de alteração sensíveis continuam protegidas.
         </p>
       </div>
 
-      {/* Status Gate F0 */}
-      <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3">
-        <span className="text-2xl">🟢</span>
-        <div>
-          <p className="font-semibold text-green-800">Gate F0: GO (banco + segurança)</p>
-          <p className="text-sm text-green-700 mt-0.5">
-            53/53 testes passando — Isolamento RLS, Auditoria, Feature Flags, Sessões.
-            Pendente: CI/CD GitHub + Deploy Vercel.
-          </p>
-        </div>
-      </div>
-
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {cards.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            target={card.external ? "_blank" : undefined}
-            className={`
-              block p-6 bg-white border rounded-xl transition-all
-              ${card.status === "ok"
-                ? "border-slate-200 hover:border-blue-300 hover:shadow-md cursor-pointer"
-                : "border-slate-100 opacity-60 cursor-not-allowed pointer-events-none"
-              }
-            `}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <span className="text-3xl">{card.icon}</span>
-              <span className={`
-                text-xs px-2 py-1 rounded-full font-medium
-                ${card.status === "ok"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-slate-100 text-slate-500"
-                }
-              `}>
-                {card.badge}
-              </span>
-            </div>
-            <h3 className="font-semibold text-slate-800 mb-1">{card.title}</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">{card.description}</p>
-          </Link>
-        ))}
-      </div>
-
-      {/* Resumo técnico */}
-      <div className="mt-8 p-5 bg-slate-800 rounded-xl text-white">
-        <p className="text-xs font-mono text-slate-400 mb-3">STACK TÉCNICA</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          {[
-            ["Banco", "PostgreSQL 16 + pgvector"],
-            ["ORM", "Drizzle ORM 0.38"],
-            ["API", "tRPC 11"],
-            ["Auth", "Auth.js v5 + TOTP"],
-            ["Filas", "BullMQ 5 + Redis 7"],
-            ["Email", "Resend"],
-            ["Frontend", "Next.js 15 + Tailwind"],
-            ["Deploy", "Vercel (staging)"],
-          ].map(([label, value]) => (
-            <div key={label}>
-              <p className="text-slate-400 text-xs">{label}</p>
-              <p className="text-slate-100 font-medium">{value}</p>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {cards.map((card) => <ModuleCard key={card.href} {...card} />)}
       </div>
     </div>
   );
