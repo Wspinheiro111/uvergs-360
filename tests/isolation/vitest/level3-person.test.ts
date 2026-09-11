@@ -20,7 +20,7 @@ describe("Nível 3 — Isolamento de Pessoa (Fundação)", () => {
       async (ctxSql) => ctxSql`
         SELECT id FROM users WHERE tenant_id = ${ids.tenantBId}
       `
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(result).toHaveLength(0);
   });
@@ -30,7 +30,7 @@ describe("Nível 3 — Isolamento de Pessoa (Fundação)", () => {
       ids.tenantAId,
       ids.userA1Id,
       async (ctxSql) => ctxSql`SELECT app.is_service_role() AS is_service`
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(result[0]?.is_service).toBe(false);
   });
@@ -56,7 +56,7 @@ describe("Nível 3 — Isolamento de Pessoa (Fundação)", () => {
       async (ctxSql) => ctxSql`
         SELECT * FROM signed_access_links WHERE id = ${link.id}
       `
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(result).toHaveLength(0);
 

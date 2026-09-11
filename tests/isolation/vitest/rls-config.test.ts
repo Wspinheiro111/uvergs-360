@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { sql, ids, setupFixtures, teardownFixtures, withContext } from "./fixtures";
+import { sql, setupFixtures, teardownFixtures } from "./fixtures";
 
 beforeAll(setupFixtures);
 afterAll(teardownFixtures);

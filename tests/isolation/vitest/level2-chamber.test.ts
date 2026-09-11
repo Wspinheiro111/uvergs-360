@@ -21,7 +21,7 @@ describe("Nível 2 — Isolamento de Câmara (Fundação)", () => {
           app.current_tenant_id() AS tenant_id,
           app.current_user_id() AS user_id
       `
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(result[0]?.tenant_id).toBe(ids.tenantAId);
     expect(result[0]?.user_id).toBe(ids.userA1Id);

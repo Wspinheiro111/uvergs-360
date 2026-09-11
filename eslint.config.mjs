@@ -130,6 +130,7 @@ export default defineConfig([
       "apps/worker/src/**/*.ts",
       "packages/adapters/**/*.ts",
       "packages/db/seed/**/*",
+      "apps/web/src/lib/logger.ts",
     ],
     rules: {
       "quality/no-direct-console": "off",

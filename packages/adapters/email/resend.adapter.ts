@@ -147,10 +147,12 @@ export class ResendEmailAdapter {
           "X-Correlation-Id": options.correlationId,
           "X-Tenant-Id": options.tenantId,
         },
-      // TODO(#101): o SDK do Resend não tem tipo público para envio por
-      // template alias (é um recurso do dashboard, sem contrato TS). Tipar
-      // direito exige modelar o shape real da API de templates — fora do
-      // escopo de lint fix mecânico. Retirado do burn-down (prompt 02, §2).
+        // TODO(#101): o SDK do Resend não tem tipo público para envio por
+        // template alias (é um recurso do dashboard, sem contrato TS). Tipar
+        // direito exige modelar o shape real da API de templates — fora do
+        // escopo de lint fix mecânico. Suprimido, não removido: o `any`
+        // continua existindo, só não é mais reportado como pendência solta.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       if (error) {

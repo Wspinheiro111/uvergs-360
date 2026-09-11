@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
+  // typescript.ignoreBuildErrors e eslint.ignoreDuringBuilds foram removidos
+  // de propósito: o typecheck e o lint estão limpos (Gate F0, prompt 02) e
+  // mascarar erros de build de novo reintroduziria exatamente o problema
+  // que essa limpeza corrigiu. A chave `eslint` também não existe mais no
+  // tipo do Next 16 — o `next lint` embutido foi descontinuado.
   async headers() {
     return [
       {

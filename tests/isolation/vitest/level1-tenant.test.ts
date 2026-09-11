@@ -27,7 +27,7 @@ describe("Nível 1 — Isolamento de Tenant", () => {
       async (ctxSql) => ctxSql`
         SELECT * FROM feature_flags WHERE key = 'TEST_FLAG_B_ONLY'
       `
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(result).toHaveLength(0); // RLS filtrou — Tenant A não vê dados do Tenant B
 
@@ -42,7 +42,7 @@ describe("Nível 1 — Isolamento de Tenant", () => {
       async (ctxSql) => ctxSql`
         SELECT * FROM users WHERE tenant_id = ${ids.tenantAId}
       `
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(result).toHaveLength(0);
   });
@@ -69,7 +69,7 @@ describe("Nível 1 — Isolamento de Tenant", () => {
       async (ctxSql) => ctxSql`
         SELECT COUNT(*) as count FROM users WHERE tenant_id = ${ids.tenantBId}
       `
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(parseInt(result[0]?.count ?? "0")).toBe(0);
   });
@@ -85,7 +85,7 @@ describe("Nível 1 — Isolamento de Tenant", () => {
       ids.tenantAId,
       ids.userA1Id,
       async (ctxSql) => ctxSql`SELECT app.current_tenant_id() AS tenant_id`
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(tenantFromContext[0]?.tenant_id).toBe(ids.tenantAId);
 
@@ -94,7 +94,7 @@ describe("Nível 1 — Isolamento de Tenant", () => {
       ids.tenantBId,
       ids.userB1Id,
       async (ctxSql) => ctxSql`SELECT app.current_tenant_id() AS tenant_id`
-    ) as any[];
+    ) as Record<string, unknown>[];
 
     expect(tenantBContext[0]?.tenant_id).toBe(ids.tenantBId);
     expect(tenantBContext[0]?.tenant_id).not.toBe(ids.tenantAId);
