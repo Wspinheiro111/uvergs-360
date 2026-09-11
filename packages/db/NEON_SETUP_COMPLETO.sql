@@ -1019,7 +1019,7 @@ CREATE POLICY security_incidents_tenant_isolation ON security_incidents
 GRANT SELECT ON audit_logs, personal_data_access_logs TO app_user;
 GRANT SELECT, INSERT, UPDATE ON
   outbox_events, notifications, file_assets,
-  usage_meters, security_incidents, import_batches
+  usage_meters, security_incidents
 TO app_user;
 
 -- ═══ MIGRATION 0005_global_references.sql ═══
