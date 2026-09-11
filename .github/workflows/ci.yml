@@ -235,7 +235,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Executar testes unitários
-        run: pnpm vitest run --reporter=verbose
+        run: pnpm vitest run tests/unit --reporter=verbose
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

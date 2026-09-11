@@ -82,7 +82,15 @@ GRANT USAGE ON SCHEMA audit TO service_role, readonly_role;
 -- ---------------------------------------------------------------------------
 
 -- Timezone padrão: UTC (exibição em America/Sao_Paulo na aplicação)
-ALTER DATABASE uvergs360_dev SET timezone = 'UTC';
+DO $$
+BEGIN
+  EXECUTE format(
+    'ALTER DATABASE %I SET timezone TO %L',
+    current_database(),
+    'UTC'
+  );
+END
+$$;
 
 -- Desabilitar acesso a tabelas sem permissão explícita
 ALTER DEFAULT PRIVILEGES IN SCHEMA app
