@@ -4,7 +4,7 @@
 --
 -- COMO USAR:
 --   1. Acesse https://console.neon.tech → seu projeto → SQL Editor
---   2. Cole TODO este arquivo
+--   2. Cole o conteúdo completo deste arquivo
 --   3. Clique em Run
 --
 -- Cria: extensions, roles, schemas, 34 tabelas, RLS, políticas,
