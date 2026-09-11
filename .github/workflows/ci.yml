@@ -197,7 +197,7 @@ jobs:
         run: |
           PGPASSWORD=uvergs360_test_secret psql \
             -h localhost -p 5433 -U uvergs360 -d uvergs360_test \
-            -f packages/db/init/00_roles_and_extensions.sql
+            -f init/00_roles_and_extensions.sql
           pnpm db:migrate
         working-directory: packages/db
         env:
