@@ -9,10 +9,7 @@ export * from "./platform/auth.ts";
 export * from "./platform/audit.ts";
 
 // Institutional (F1)
-// export * from "./institutional/municipality.ts";
-// export * from "./institutional/chamber.ts";
-// export * from "./institutional/person.ts";
-// export * from "./institutional/mandate.ts";
+export * from "./institutional/core.ts";
 
 // Events (F1)
 // export * from "./events/event.ts";

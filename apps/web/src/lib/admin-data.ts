@@ -67,6 +67,34 @@ export interface AdminOverview {
   auditEvents24h: number;
 }
 
+export type ChamberStatus = "active" | "inactive" | "pending";
+export type AffiliationStatus = "affiliated" | "prospect" | "inactive";
+
+export interface InstitutionalChamberRow {
+  id: string;
+  legalName: string;
+  shortName: string | null;
+  municipality: string;
+  stateCode: string;
+  mesoregion: string | null;
+  status: ChamberStatus;
+  affiliationStatus: AffiliationStatus;
+  councilors: number;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface InstitutionalDirectory {
+  chambers: InstitutionalChamberRow[];
+  totals: {
+    chambers: number;
+    affiliated: number;
+    municipalities: number;
+    activeMandates: number;
+  };
+  regions: string[];
+}
+
 interface SessionContext {
   userId: string;
   tenantId: string;
@@ -140,6 +168,63 @@ export async function loadAdminOverview(): Promise<AdminDataResult<AdminOverview
         (SELECT COUNT(*)::int FROM audit_logs WHERE created_at >= NOW() - INTERVAL '24 hours') AS "auditEvents24h"
     `;
     return overview ?? { users: 0, activeUsers: 0, enabledFlags: 0, totalFlags: 0, auditEvents24h: 0 };
+  });
+}
+
+export async function loadInstitutionalDirectory(
+  search: string,
+  affiliation: AffiliationStatus | "all",
+  region: string
+): Promise<AdminDataResult<InstitutionalDirectory>> {
+  return withAdminRead(ADMIN_ROLES, async (sql) => {
+    const pattern = `%${search}%`;
+    const chambers = await sql<InstitutionalChamberRow[]>`
+      SELECT
+        c.id,
+        c.legal_name AS "legalName",
+        c.short_name AS "shortName",
+        m.name AS municipality,
+        m.state_code AS "stateCode",
+        m.mesoregion,
+        c.status,
+        c.affiliation_status AS "affiliationStatus",
+        COUNT(md.id) FILTER (WHERE md.status IN ('active', 'licensed'))::int AS councilors,
+        c.email,
+        c.phone
+      FROM chambers c
+      JOIN public_ref.municipalities m ON m.id = c.municipality_id
+      LEFT JOIN mandates md ON md.chamber_id = c.id AND md.tenant_id = c.tenant_id
+      WHERE (${search.length === 0}
+        OR c.legal_name ILIKE ${pattern}
+        OR COALESCE(c.short_name, '') ILIKE ${pattern}
+        OR m.name ILIKE ${pattern})
+        AND (${affiliation === "all"} OR c.affiliation_status = ${affiliation})
+        AND (${region.length === 0} OR COALESCE(m.mesoregion, '') = ${region})
+      GROUP BY c.id, m.name, m.state_code, m.mesoregion
+      ORDER BY m.name, c.legal_name
+      LIMIT 100
+    `;
+
+    const [totals] = await sql<InstitutionalDirectory["totals"][]>`
+      SELECT
+        (SELECT COUNT(*)::int FROM chambers) AS chambers,
+        (SELECT COUNT(*)::int FROM chambers WHERE affiliation_status = 'affiliated') AS affiliated,
+        (SELECT COUNT(DISTINCT municipality_id)::int FROM chambers) AS municipalities,
+        (SELECT COUNT(*)::int FROM mandates WHERE status IN ('active', 'licensed')) AS "activeMandates"
+    `;
+    const regionRows = await sql<{ region: string }[]>`
+      SELECT DISTINCT m.mesoregion AS region
+      FROM chambers c
+      JOIN public_ref.municipalities m ON m.id = c.municipality_id
+      WHERE m.mesoregion IS NOT NULL AND m.mesoregion <> ''
+      ORDER BY m.mesoregion
+    `;
+
+    return {
+      chambers,
+      totals: totals ?? { chambers: 0, affiliated: 0, municipalities: 0, activeMandates: 0 },
+      regions: regionRows.map((item) => item.region),
+    };
   });
 }
 

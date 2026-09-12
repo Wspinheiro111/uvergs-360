@@ -12,6 +12,43 @@ beforeAll(setupFixtures);
 afterAll(teardownFixtures);
 
 describe("Nível 1 — Isolamento de Tenant", () => {
+  it("Câmaras e mandatos institucionais não vazam entre tenants", async () => {
+    const [municipality] = await sql`
+      INSERT INTO public_ref.municipalities (ibge_code, name, state_code, import_source)
+      VALUES ('9999999', 'Município de Teste', 'RS', 'ci')
+      ON CONFLICT (ibge_code, state_code) DO UPDATE SET name = EXCLUDED.name
+      RETURNING id
+    `;
+    const chambers = await sql`
+      INSERT INTO chambers (tenant_id, municipality_id, legal_name, affiliation_status)
+      VALUES
+        (${ids.tenantAId}, ${municipality?.id}, 'Câmara do Tenant A', 'affiliated'),
+        (${ids.tenantBId}, ${municipality?.id}, 'Câmara do Tenant B', 'prospect')
+      ON CONFLICT (tenant_id, municipality_id) DO UPDATE SET legal_name = EXCLUDED.legal_name
+      RETURNING id, tenant_id
+    `;
+    const chamberA = chambers.find((chamber) => chamber.tenant_id === ids.tenantAId);
+    const personA = await sql`
+      INSERT INTO persons (tenant_id, full_name)
+      VALUES (${ids.tenantAId}, 'Pessoa Institucional A')
+      RETURNING id
+    `;
+    await sql`
+      INSERT INTO mandates (tenant_id, person_id, chamber_id, started_at)
+      VALUES (${ids.tenantAId}, ${personA[0]?.id}, ${chamberA?.id}, '2025-01-01')
+    `;
+
+    const visibleChambers = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT legal_name FROM chambers ORDER BY legal_name
+    `) as { legal_name: string }[];
+    const visibleMandates = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT id FROM mandates
+    `) as { id: string }[];
+
+    expect(visibleChambers.map((chamber) => chamber.legal_name)).toEqual(["Câmara do Tenant B"]);
+    expect(visibleMandates).toHaveLength(0);
+  });
+
   it("Tenant A não consegue ler registros do Tenant B via RLS", async () => {
     // Criar uma feature_flag no Tenant B
     await sql`

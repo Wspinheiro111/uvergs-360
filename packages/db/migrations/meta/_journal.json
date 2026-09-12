@@ -50,6 +50,13 @@
       "when": 2026091200010,
       "tag": "0007_service_role_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 2026091200020,
+      "tag": "0008_institutional_core",
+      "breakpoints": true
     }
   ]
 }

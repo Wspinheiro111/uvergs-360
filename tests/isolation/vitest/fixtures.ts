@@ -53,6 +53,18 @@ export async function setupFixtures(): Promise<void> {
 
 export async function teardownFixtures(): Promise<void> {
   await sql`
+    DELETE FROM mandates
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM persons
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM chambers
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
     DELETE FROM signed_access_links
     WHERE created_by IN (
       SELECT id FROM users WHERE email LIKE '%@test.uvergs360'
@@ -78,6 +90,7 @@ export async function teardownFixtures(): Promise<void> {
   `;
   await sql`DELETE FROM users WHERE email LIKE '%@test.uvergs360'`;
   await sql`DELETE FROM tenants WHERE slug LIKE '%-test'`;
+  await sql`DELETE FROM public_ref.municipalities WHERE ibge_code = '9999999'`;
   await sql.end();
 }
 
