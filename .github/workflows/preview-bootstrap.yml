@@ -1,0 +1,173 @@
+name: Bootstrap Preview PR 2
+
+on:
+  push:
+    branches:
+      - feat/f1-functional-core-20260911
+    paths:
+      - .github/workflows/preview-bootstrap.yml
+
+permissions:
+  contents: read
+
+jobs:
+  configure-preview:
+    name: Configure isolated Vercel Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_ORG_ID: team_Vh49iBf2IVkCwgKAaqgaWC2S
+      VERCEL_PROJECT_ID: prj_zdFFZpObyDe3dmPXUDwfVNVHoz4Z
+      VERCEL_SCOPE: gerentewilliampinheiro-3737
+      PREVIEW_BRANCH: feat/f1-functional-core-20260911
+      EXPECTED_NEON_HOST: ep-long-meadow-aczps92m-pooler.sa-east-1.aws.neon.tech
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify required CI credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "VERCEL_TOKEN is not configured in GitHub Actions."
+            exit 1
+          fi
+
+      - name: Install pinned Vercel CLI
+        run: npm install --global vercel@59.16.0
+
+      - name: Link exact Vercel project and pull Preview environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .vercel
+          node -e 'require("fs").writeFileSync(".vercel/project.json", JSON.stringify({orgId: process.env.VERCEL_ORG_ID, projectId: process.env.VERCEL_PROJECT_ID}))'
+          vercel env pull "${RUNNER_TEMP}/preview.env" \
+            --environment=preview \
+            --yes \
+            --token="${VERCEL_TOKEN}" \
+            --scope="${VERCEL_SCOPE}"
+
+      - name: Create least-privilege database URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          OWNER_DATABASE_URL="$(node --env-file="${RUNNER_TEMP}/preview.env" -e 'process.stdout.write(process.env.DATABASE_URL || "")')"
+          if [ -z "${OWNER_DATABASE_URL}" ]; then
+            echo "DATABASE_URL is missing from the Preview environment."
+            exit 1
+          fi
+
+          DATABASE_HOST="$(DATABASE_URL="${OWNER_DATABASE_URL}" node -e 'process.stdout.write(new URL(process.env.DATABASE_URL).hostname)')"
+          if [ "${DATABASE_HOST}" != "${EXPECTED_NEON_HOST}" ]; then
+            echo "Refusing to continue: DATABASE_URL does not target preview-pr2."
+            exit 1
+          fi
+
+          APP_PASSWORD="$(openssl rand -hex 32)"
+          SERVICE_PASSWORD="$(openssl rand -hex 32)"
+          echo "::add-mask::${OWNER_DATABASE_URL}"
+          echo "::add-mask::${APP_PASSWORD}"
+          echo "::add-mask::${SERVICE_PASSWORD}"
+
+          psql "${OWNER_DATABASE_URL}" \
+            --set=ON_ERROR_STOP=1 \
+            --set=app_password="${APP_PASSWORD}" \
+            --set=service_password="${SERVICE_PASSWORD}" <<'SQL'
+          DO $body$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_runtime_preview') THEN
+              CREATE ROLE app_runtime_preview LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_runtime_preview') THEN
+              CREATE ROLE service_runtime_preview LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+            END IF;
+          END
+          $body$;
+          ALTER ROLE app_runtime_preview PASSWORD :'app_password';
+          ALTER ROLE service_runtime_preview PASSWORD :'service_password';
+          GRANT app_user TO app_runtime_preview;
+          GRANT service_role TO service_runtime_preview;
+          SQL
+
+          APP_DATABASE_URL="$(DATABASE_URL="${OWNER_DATABASE_URL}" DB_USER=app_runtime_preview DB_PASSWORD="${APP_PASSWORD}" node -e 'const u=new URL(process.env.DATABASE_URL);u.username=process.env.DB_USER;u.password=process.env.DB_PASSWORD;process.stdout.write(u.toString())')"
+          SERVICE_DATABASE_URL="$(DATABASE_URL="${OWNER_DATABASE_URL}" DB_USER=service_runtime_preview DB_PASSWORD="${SERVICE_PASSWORD}" node -e 'const u=new URL(process.env.DATABASE_URL);u.username=process.env.DB_USER;u.password=process.env.DB_PASSWORD;process.stdout.write(u.toString())')"
+          AUTH_SECRET="$(openssl rand -hex 32)"
+          SIGNED_LINK_SECRET="$(openssl rand -hex 32)"
+          TOTP_ENCRYPTION_KEY="$(openssl rand -hex 32)"
+
+          for value in "${APP_DATABASE_URL}" "${SERVICE_DATABASE_URL}" "${AUTH_SECRET}" "${SIGNED_LINK_SECRET}" "${TOTP_ENCRYPTION_KEY}"; do
+            echo "::add-mask::${value}"
+          done
+
+          {
+            echo "APP_DATABASE_URL=${APP_DATABASE_URL}"
+            echo "SERVICE_DATABASE_URL=${SERVICE_DATABASE_URL}"
+            echo "AUTH_SECRET=${AUTH_SECRET}"
+            echo "SIGNED_LINK_SECRET=${SIGNED_LINK_SECRET}"
+            echo "TOTP_ENCRYPTION_KEY=${TOTP_ENCRYPTION_KEY}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Upsert branch-scoped Preview variables
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          upsert_env() {
+            local key="$1"
+            local value="$2"
+            local body="${RUNNER_TEMP}/${key}.json"
+            local response="${RUNNER_TEMP}/${key}.response.json"
+            local status
+
+            KEY="${key}" VALUE="${value}" node -e 'require("fs").writeFileSync(process.argv[1], JSON.stringify({key:process.env.KEY,value:process.env.VALUE,type:"encrypted",target:["preview"],gitBranch:process.env.PREVIEW_BRANCH,comment:"Isolated PR #2 preview"}))' "${body}"
+            status="$(curl --silent --show-error \
+              --output "${response}" \
+              --write-out "%{http_code}" \
+              --request POST \
+              --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --data-binary "@${body}" \
+              "https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?teamId=${VERCEL_ORG_ID}&upsert=true")"
+
+            if [[ ! "${status}" =~ ^2 ]]; then
+              echo "Failed to configure ${key} (HTTP ${status})."
+              node -e 'const r=require(process.argv[1]); console.error(r.error?.message || "Vercel API error")' "${response}"
+              exit 1
+            fi
+            echo "Configured ${key} for Preview branch only."
+          }
+
+          upsert_env DATABASE_URL "${APP_DATABASE_URL}"
+          upsert_env DATABASE_URL_SERVICE "${SERVICE_DATABASE_URL}"
+          upsert_env AUTH_SECRET "${AUTH_SECRET}"
+          upsert_env SIGNED_LINK_SECRET "${SIGNED_LINK_SECRET}"
+          upsert_env TOTP_ENCRYPTION_KEY "${TOTP_ENCRYPTION_KEY}"
+
+      - name: Deploy Preview only
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEPLOY_URL="$(vercel deploy \
+            --yes \
+            --token="${VERCEL_TOKEN}" \
+            --scope="${VERCEL_SCOPE}")"
+          echo "url=${DEPLOY_URL}" >> "${GITHUB_OUTPUT}"
+          echo "Preview deployed: ${DEPLOY_URL}"
+
+      - name: Smoke test Preview health
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          set -euo pipefail
+          sleep 10
+          curl --fail --silent --show-error "${DEPLOY_URL}/api/health" > "${RUNNER_TEMP}/health.json"
+          node -e 'const h=require(process.argv[1]);if(h.status!=="ok")throw new Error(`health status: ${h.status}`);console.log("Preview health: ok")' "${RUNNER_TEMP}/health.json"
