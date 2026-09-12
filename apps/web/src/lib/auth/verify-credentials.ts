@@ -21,6 +21,13 @@ export interface AuthorizedUser {
   mfaVerified: boolean;
 }
 
+async function openServiceClient(dbUrl: string): Promise<SqlClient> {
+  const postgres = (await import("postgres")).default;
+  const sql = postgres(dbUrl, { max: 2, idle_timeout: 10 });
+  await sql.unsafe("SET ROLE service_role");
+  return sql;
+}
+
 /**
  * Verifica email + senha contra o banco e retorna o usuário autorizado,
  * ou null em qualquer falha (tenant inexistente, senha errada, conta
@@ -32,11 +39,14 @@ export async function verifyCredentials(
 ): Promise<AuthorizedUser | null> {
   const { email, password, tenantSlug } = input;
 
-  const dbUrl = process.env.DATABASE_URL;
+  // O login ainda não conhece o tenant_id do usuário, portanto não pode
+  // consultar `users` sob o RLS de app_user. A conexão de serviço é usada
+  // somente neste fluxo de bootstrap da sessão; todas as consultas após o
+  // login voltam ao DATABASE_URL com contexto explícito de tenant e usuário.
+  const dbUrl = process.env.DATABASE_URL_SERVICE ?? process.env.DATABASE_URL;
   if (!dbUrl) return null;
 
-  const postgres = (await import("postgres")).default;
-  const sql = postgres(dbUrl, { max: 2, idle_timeout: 10 });
+  const sql = await openServiceClient(dbUrl);
 
   try {
     const tenant = await findActiveTenant(sql, tenantSlug);
