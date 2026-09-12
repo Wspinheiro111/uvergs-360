@@ -67,10 +67,10 @@ BEGIN
 END
 $$;
 
--- Conceder roles ao usuário da aplicação
-GRANT app_user TO uvergs360;
-GRANT service_role TO uvergs360;
-GRANT readonly_role TO uvergs360;
+-- Permitir que a role proprietária da conexão alterne para as roles da
+-- aplicação. CURRENT_USER mantém o bootstrap portável entre Docker
+-- (uvergs360), Neon (neondb_owner) e outros ambientes PostgreSQL.
+GRANT app_user, service_role, readonly_role TO CURRENT_USER;
 
 -- ---------------------------------------------------------------------------
 -- SCHEMAS
