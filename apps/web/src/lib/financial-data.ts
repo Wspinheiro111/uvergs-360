@@ -76,7 +76,7 @@ export async function loadFinancialDirectory(
         SELECT r.id, r.description, r.competence, r.kind, r.status,
           r.due_date AS "dueDate", r.amount_cents AS "amountCents",
           COALESCE(SUM(p.amount_cents) FILTER (WHERE p.status = 'confirmed'), 0)::int AS "paidCents",
-          COALESCE(c.short_name, c.legal_name, pe.preferred_name, pe.full_name, 'Participante de evento') AS "debtorName",
+          COALESCE(c.short_name, c.legal_name, pe.preferred_name, pe.full_name, r.debtor_name, 'Participante de evento') AS "debtorName",
           m.name AS municipality
         FROM receivables r
         LEFT JOIN chambers c ON c.tenant_id=r.tenant_id AND c.id=r.chamber_id
@@ -84,9 +84,9 @@ export async function loadFinancialDirectory(
         LEFT JOIN persons pe ON pe.tenant_id=r.tenant_id AND pe.id=r.person_id
         LEFT JOIN payments p ON p.tenant_id=r.tenant_id AND p.receivable_id=r.id
         WHERE (${search.length === 0} OR r.description ILIKE ${pattern}
-          OR COALESCE(c.short_name, c.legal_name, pe.preferred_name, pe.full_name, '') ILIKE ${pattern})
+          OR COALESCE(c.short_name, c.legal_name, pe.preferred_name, pe.full_name, r.debtor_name, '') ILIKE ${pattern})
           AND (${receivableStatus === "all"} OR r.status=${receivableStatus})
-        GROUP BY r.id, c.short_name, c.legal_name, pe.preferred_name, pe.full_name, m.name
+        GROUP BY r.id, c.short_name, c.legal_name, pe.preferred_name, pe.full_name, r.debtor_name, m.name
         ORDER BY r.due_date DESC LIMIT 100
       `,
       sql<PayableRow[]>`

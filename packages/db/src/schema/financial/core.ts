@@ -23,6 +23,7 @@ export const receivables = pgTable(
     registrationId: uuid("registration_id"),
     kind: text("kind", { enum: ["membership", "event", "service", "other"] }).notNull(),
     description: text("description").notNull(),
+    debtorName: text("debtor_name"),
     competence: text("competence"),
     dueDate: date("due_date").notNull(),
     amountCents: integer("amount_cents").notNull(),

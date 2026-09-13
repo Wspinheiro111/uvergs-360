@@ -12,7 +12,7 @@ type FinancialView = typeof VIEWS[number][0];
 const RECEIVABLE_STATUSES = new Set<ReceivableStatus>(["open", "overdue", "partial", "paid", "cancelled", "waived"]);
 const PAYABLE_STATUSES = new Set<PayableStatus>(["draft", "pending_approval", "approved", "partial", "paid", "overdue", "cancelled"]);
 
-interface FinancialPageProps { searchParams: Promise<{ view?: string; q?: string; receber?: string; pagar?: string }>; }
+interface FinancialPageProps { searchParams: Promise<{ view?: string; q?: string; receber?: string; pagar?: string; notice?: string; error?: string }>; }
 function viewOf(value?: string): FinancialView { return VIEWS.some(([key]) => key === value) ? value as FinancialView : "overview"; }
 
 export default async function FinancialPage({ searchParams }: FinancialPageProps) {
@@ -32,6 +32,8 @@ export default async function FinancialPage({ searchParams }: FinancialPageProps
 
     <nav className="mt-6 flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2" aria-label="Áreas financeiras">{VIEWS.map(([key, label]) => <Link key={key} href={`/admin/financeiro?view=${key}`} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${view === key ? "bg-[#0b4b7e] text-white shadow-md" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"}`}>{label}</Link>)}</nav>
     {result.error && <div className="mt-6"><DataNotice message={result.error} /></div>}
+    {params.notice && <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">{params.notice}</div>}
+    {params.error && <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700">{params.error}</div>}
 
     {directory && <div className="mt-6 space-y-6">
       <section className="metric-grid"><article className="metric-card metric-blue"><p className="text-xs uppercase tracking-wider text-slate-500">A receber</p><p className="mt-3 text-2xl font-bold text-slate-950">{currency(directory.totals.expectedCents)}</p><p className="mt-1 text-xs text-slate-500">{currency(directory.totals.receivablesOverdueCents)} vencido</p></article><article className="metric-card metric-green"><p className="text-xs uppercase tracking-wider text-slate-500">Recebido</p><p className="mt-3 text-2xl font-bold text-slate-950">{currency(directory.totals.receivedCents)}</p><p className="mt-1 text-xs text-slate-500">baixas confirmadas</p></article><article className="metric-card metric-gold"><p className="text-xs uppercase tracking-wider text-slate-500">A pagar</p><p className="mt-3 text-2xl font-bold text-slate-950">{currency(directory.totals.payablesOpenCents)}</p><p className="mt-1 text-xs text-slate-500">{currency(directory.totals.payablesOverdueCents)} vencido</p></article><article className="metric-card metric-violet"><p className="text-xs uppercase tracking-wider text-slate-500">Compromissos</p><p className="mt-3 text-2xl font-bold text-slate-950">{currency(directory.totals.commitmentsCents)}</p><p className="mt-1 text-xs text-slate-500">planejados e aprovados</p></article></section>

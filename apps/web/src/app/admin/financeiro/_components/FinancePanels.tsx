@@ -1,4 +1,8 @@
+"use client";
+
 import type { FinancialDirectory, PayableStatus, ReceivableStatus } from "@/lib/financial-data";
+
+import { createPayableAction, createReceivableAction, deletePayableAction, deleteReceivableAction } from "../actions";
 
 const RECEIVABLE_LABELS: Record<ReceivableStatus, string> = { open: "Em aberto", overdue: "Vencida", partial: "Parcial", paid: "Quitada", cancelled: "Cancelada", waived: "Isenta" };
 const PAYABLE_LABELS: Record<PayableStatus, string> = { draft: "Rascunho", pending_approval: "Aprovação", approved: "Aprovada", partial: "Parcial", paid: "Paga", overdue: "Vencida", cancelled: "Cancelada" };
@@ -8,12 +12,40 @@ export function currency(cents: number) { return new Intl.NumberFormat("pt-BR", 
 function date(value: Date) { return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(value); }
 
 export function ReceivablesPanel({ data }: { data: FinancialDirectory["receivables"] }) {
-  return <section className="surface-panel overflow-hidden"><div className="border-b border-slate-200 p-6"><span className="eyebrow">Receitas</span><h2 className="mt-1 text-xl font-semibold text-slate-950">Contas a receber e anuidades</h2></div><div className="divide-y divide-slate-100">{data.map(item => <article key={item.id} className="grid gap-3 px-5 py-5 lg:grid-cols-[1.4fr_.65fr_.65fr_auto] lg:items-center"><div><h3 className="font-semibold text-slate-900">{item.debtorName}</h3><p className="mt-1 text-sm text-slate-500">{item.description}{item.competence ? ` · ${item.competence}` : ""}</p></div><div><p className="text-[10px] uppercase tracking-wider text-slate-400">Vencimento</p><p className="mt-1 text-sm text-slate-700">{date(item.dueDate)}</p></div><div><p className="font-semibold text-slate-900">{currency(item.amountCents)}</p><p className="text-[11px] text-slate-400">{currency(item.paidCents)} recebido</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${STATUS_TONE[item.status]}`}>{RECEIVABLE_LABELS[item.status]}</span></article>)}</div></section>;
+  return <div className="space-y-6"><EntryForm kind="receivable" /><section className="surface-panel overflow-hidden"><div className="border-b border-slate-200 p-6"><span className="eyebrow">Receitas</span><h2 className="mt-1 text-xl font-semibold text-slate-950">Contas a receber e anuidades</h2></div><div className="divide-y divide-slate-100">{data.length === 0 && <EmptyState />}{data.map(item => <article key={item.id} className="grid gap-3 px-5 py-5 lg:grid-cols-[1.4fr_.65fr_.65fr_auto_auto] lg:items-center"><div><h3 className="font-semibold text-slate-900">{item.debtorName}</h3><p className="mt-1 text-sm text-slate-500">{item.description}{item.competence ? ` · ${item.competence}` : ""}</p></div><div><p className="text-[10px] uppercase tracking-wider text-slate-400">Vencimento</p><p className="mt-1 text-sm text-slate-700">{date(item.dueDate)}</p></div><div><p className="font-semibold text-slate-900">{currency(item.amountCents)}</p><p className="text-[11px] text-slate-400">{currency(item.paidCents)} recebido</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${STATUS_TONE[item.status]}`}>{RECEIVABLE_LABELS[item.status]}</span><DeleteButton id={item.id} action={deleteReceivableAction} disabled={item.paidCents > 0} /></article>)}</div></section></div>;
 }
 
 export function PayablesPanel({ data }: { data: FinancialDirectory["payables"] }) {
-  return <section className="surface-panel overflow-hidden"><div className="border-b border-slate-200 p-6"><span className="eyebrow">Despesas</span><h2 className="mt-1 text-xl font-semibold text-slate-950">Contas a pagar e aprovações</h2></div><div className="divide-y divide-slate-100">{data.map(item => <article key={item.id} className="grid gap-3 px-5 py-5 lg:grid-cols-[1.35fr_.75fr_.6fr_auto] lg:items-center"><div><h3 className="font-semibold text-slate-900">{item.counterpartyName}</h3><p className="mt-1 text-sm text-slate-500">{item.description}</p><p className="mt-1 text-[11px] text-slate-400">{item.costCenterName}{item.projectName ? ` · ${item.projectName}` : ""}</p></div><div><p className="text-[10px] uppercase tracking-wider text-slate-400">Vencimento</p><p className="mt-1 text-sm text-slate-700">{date(item.dueDate)}</p></div><div><p className="font-semibold text-slate-900">{currency(item.amountCents)}</p><p className="text-[11px] text-slate-400">{currency(item.paidCents)} pago</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${STATUS_TONE[item.status]}`}>{PAYABLE_LABELS[item.status]}</span></article>)}</div></section>;
+  return <div className="space-y-6"><EntryForm kind="payable" /><section className="surface-panel overflow-hidden"><div className="border-b border-slate-200 p-6"><span className="eyebrow">Despesas</span><h2 className="mt-1 text-xl font-semibold text-slate-950">Contas a pagar e aprovações</h2></div><div className="divide-y divide-slate-100">{data.length === 0 && <EmptyState />}{data.map(item => <article key={item.id} className="grid gap-3 px-5 py-5 lg:grid-cols-[1.35fr_.75fr_.6fr_auto_auto] lg:items-center"><div><h3 className="font-semibold text-slate-900">{item.counterpartyName}</h3><p className="mt-1 text-sm text-slate-500">{item.description}</p><p className="mt-1 text-[11px] text-slate-400">{item.costCenterName}{item.projectName ? ` · ${item.projectName}` : ""}</p></div><div><p className="text-[10px] uppercase tracking-wider text-slate-400">Vencimento</p><p className="mt-1 text-sm text-slate-700">{date(item.dueDate)}</p></div><div><p className="font-semibold text-slate-900">{currency(item.amountCents)}</p><p className="text-[11px] text-slate-400">{currency(item.paidCents)} pago</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${STATUS_TONE[item.status]}`}>{PAYABLE_LABELS[item.status]}</span><DeleteButton id={item.id} action={deletePayableAction} disabled={item.paidCents > 0} /></article>)}</div></section></div>;
 }
+
+function EntryForm({ kind }: { kind: "receivable" | "payable" }) {
+  const receiving = kind === "receivable";
+  const categories = receiving
+    ? [["membership", "Contribuição/Anuidade"], ["event", "Evento"], ["service", "Serviço"], ["other", "Outras receitas"]]
+    : [["administrative", "Administrativa"], ["events", "Eventos"], ["services", "Serviços"], ["taxes", "Tributos"], ["people", "Pessoal"], ["other", "Outras despesas"]];
+  return <form action={receiving ? createReceivableAction : createPayableAction} className="surface-panel p-6">
+    <div className="flex flex-wrap items-end justify-between gap-3"><div><span className="eyebrow">Novo lançamento</span><h2 className="mt-1 text-xl font-semibold text-slate-950">Incluir conta a {receiving ? "receber" : "pagar"}</h2></div><p className="text-xs text-slate-400">Campos com * são obrigatórios</p></div>
+    <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      {receiving && <Field label="Pagador *"><input name="debtorName" required minLength={2} maxLength={160} placeholder="Nome do pagador" className="form-input" /></Field>}
+      <Field label="Descrição *" wide={!receiving}><input name="description" required minLength={3} maxLength={240} placeholder="Descrição do lançamento" className="form-input" /></Field>
+      <Field label="Categoria *"><select name="category" required className="form-input">{categories.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></Field>
+      <Field label="Vencimento *"><input type="date" name="dueDate" required className="form-input" /></Field>
+      <Field label="Valor (R$) *"><input name="amount" required inputMode="decimal" placeholder="0,00" pattern="[0-9.,]+" className="form-input" /></Field>
+    </div>
+    <div className="mt-5 flex justify-end"><button type="submit" className="rounded-xl bg-[#0b4b7e] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[#083b65]">Incluir lançamento</button></div>
+  </form>;
+}
+
+function Field({ label, children, wide = false }: { label: string; children: React.ReactNode; wide?: boolean }) {
+  return <label className={`block ${wide ? "xl:col-span-2" : ""}`}><span className="mb-1.5 block text-xs font-semibold text-slate-600">{label}</span>{children}</label>;
+}
+
+function DeleteButton({ id, action, disabled }: { id: string; action: (data: FormData) => Promise<void>; disabled: boolean }) {
+  return <form action={action} onSubmit={(event) => { if (!confirm("Excluir este lançamento? Esta ação não pode ser desfeita.")) event.preventDefault(); }}><input type="hidden" name="id" value={id} /><button type="submit" disabled={disabled} title={disabled ? "Lançamentos com baixa não podem ser excluídos" : "Excluir lançamento"} className="rounded-xl border border-red-100 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-slate-100 disabled:text-slate-300">Excluir</button></form>;
+}
+
+function EmptyState() { return <p className="px-6 py-10 text-center text-sm text-slate-400">Nenhum lançamento encontrado.</p>; }
 
 export function OverviewPanels({ directory }: { directory: FinancialDirectory }) {
   const latest = directory.monthlyResults[0];

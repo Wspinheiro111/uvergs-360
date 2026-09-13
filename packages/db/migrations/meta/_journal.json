@@ -85,6 +85,13 @@
       "when": 2026091300040,
       "tag": "0012_financial_management",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 2026091300050,
+      "tag": "0013_financial_operations",
+      "breakpoints": true
     }
   ]
 }
