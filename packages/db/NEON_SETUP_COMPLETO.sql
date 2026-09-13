@@ -1317,15 +1317,8 @@ CROSS JOIN (VALUES
 WHERE t.slug = 'uvergs'
 ON CONFLICT (tenant_id, name) DO UPDATE SET display_name = EXCLUDED.display_name;
 
--- ─── USUÁRIO ADMIN ───
--- Senha: Admin@360Dev!  (hash pbkdf2-sha512, 100000 iterações)
--- TROCAR EM PRODUÇÃO
-INSERT INTO users (tenant_id, email, email_verified, display_name, password_hash, status, locale, timezone)
-SELECT id, 'admin@uvergs360.dev', true, 'Administrador (Dev)',
-  'pbkdf2:c4f5419d785282b509837cc9a1fe7cd6:771efe4e594d3a4be5601f95c4218ed4c05c8c5d26c36bf898c0a05564244e9e31481b5756c2a5feec5e7ddd1569ff359c1d63c710db3104500a101bf8760197', -- corrigido: era um valor de exemplo inventado, nunca batia com 'Admin@360Dev!'
-  'active', 'pt-BR', 'America/Sao_Paulo'
-FROM tenants WHERE slug = 'uvergs'
-ON CONFLICT (email, tenant_id) DO UPDATE SET display_name = EXCLUDED.display_name;
+-- Usuários administrativos devem ser provisionados separadamente com uma
+-- credencial gerada por mecanismo seguro. Este script não contém senhas.
 
 -- ─── VÍNCULO ADMIN → ROLE admin_global ───
 INSERT INTO user_roles (tenant_id, user_id, role_id)

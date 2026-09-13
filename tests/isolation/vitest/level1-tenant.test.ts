@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { sql, ids, setupFixtures, teardownFixtures, withContext } from "./fixtures";
+import { sql, ids, setupFixtures, teardownFixtures, withContext, withWriterContext } from "./fixtures";
 
 beforeAll(setupFixtures);
 afterAll(teardownFixtures);
@@ -153,6 +153,24 @@ describe("Nível 1 — Isolamento de Tenant", () => {
         VALUES (${ids.tenantBId}, 'INJECTION_ATTEMPT', true, 'Tentativa de injeção cross-tenant')
       `)
     ).rejects.toThrow(); // RLS rejeita INSERT com tenant_id diferente do contexto
+  });
+
+  it("app_writer não pode gravar um título no tenant de outra sessão", async () => {
+    await expect(
+      withWriterContext(ids.tenantAId, ids.userA1Id, async (ctxSql) => ctxSql`
+        INSERT INTO receivables (tenant_id, debtor_name, kind, description, due_date, amount_cents, status)
+        VALUES (${ids.tenantBId}, 'Invasor', 'other', 'Escrita cruzada', CURRENT_DATE, 100, 'open')
+      `)
+    ).rejects.toThrow();
+  });
+
+  it("lançamento contábil postado não pode ser alterado nem excluído", async () => {
+    const [entry] = await sql`
+      INSERT INTO journal_entries (tenant_id, entry_date, memo, source_type, status)
+      VALUES (${ids.tenantAId}, CURRENT_DATE, 'Diário imutável', 'manual', 'posted') RETURNING id
+    `;
+    await expect(sql`UPDATE journal_entries SET memo='Adulterado' WHERE id=${entry.id}`).rejects.toThrow(/immutable/i);
+    await expect(sql`DELETE FROM journal_entries WHERE id=${entry.id}`).rejects.toThrow(/immutable/i);
   });
 
   it("Tentativa de leitura cross-tenant é registrada no AuditLog", async () => {

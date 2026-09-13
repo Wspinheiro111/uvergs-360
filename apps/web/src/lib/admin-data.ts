@@ -144,6 +144,7 @@ export async function withAdminRead<T>(
 
   try {
     const data = await client.begin(async (transaction) => {
+      await transaction`SET LOCAL ROLE app_user`;
       await transaction`SELECT set_config('app.current_tenant_id', ${context.data.tenantId}, true)`;
       await transaction`SELECT set_config('app.current_user_id', ${context.data.userId}, true)`;
       return query(transaction as unknown as SqlClient);

@@ -46,8 +46,10 @@ export const featureFlagsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const user = ctx.user;
+      if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
       // Verificar permissão admin_global
-      if (!ctx.user.roles.includes("admin_global")) {
+      if (!user.roles.includes("admin_global")) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Apenas administradores podem alterar feature flags.",
@@ -81,7 +83,7 @@ export const featureFlagsRouter = createTRPCRouter({
           .update(featureFlags)
           .set({
             enabled: input.enabled,
-            lastChangedBy: ctx.user.id,
+            lastChangedBy: user.id,
             lastChangedAt: new Date(),
             lastChangeReason: input.reason,
             updatedAt: new Date(),
@@ -103,7 +105,9 @@ export const featureFlagsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (!ctx.user.roles.includes("admin_global")) {
+      const user = ctx.user;
+      if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (!user.roles.includes("admin_global")) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 

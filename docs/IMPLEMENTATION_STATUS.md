@@ -38,8 +38,7 @@
 - [x] Tema institucional (azul #1a3a6e, dourado #c8a940)
 - [x] 6 flags VAL-LEGAL criadas (todas desligadas)
 - [x] 10 roles de sistema criados
-- [x] Usuário admin: admin@uvergs360.dev / Admin@360Dev!
-- [x] Usuário eventos: eventos@uvergs360.dev / Eventos@360Dev!
+- [x] Usuários de desenvolvimento criados com senhas fornecidas por variáveis de ambiente
 
 ### Testes — EXECUTADOS COM SUCESSO
 - [x] **22/22** — Isolamento L1/L2/L3 (Cenários F, K, Q)

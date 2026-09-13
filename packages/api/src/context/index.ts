@@ -1,6 +1,7 @@
-import type { NextRequest } from "next/server";
 import { db, withTenantContext } from "@uvergs360/db";
 import { generateCorrelationId, UnauthorizedError } from "@uvergs360/shared";
+
+type ApiRequest = Pick<Request, "headers">;
 
 // =============================================================================
 // CONTEXTO tRPC
@@ -19,7 +20,7 @@ export interface AuthUser {
 }
 
 export interface TRPCContext {
-  req: NextRequest;
+  req: ApiRequest;
   correlationId: string;
   user: AuthUser | null;
   tenantId: string | null;
@@ -28,7 +29,7 @@ export interface TRPCContext {
   withTenant: <T>(cb: (tx: typeof db) => Promise<T>) => Promise<T>;
 }
 
-export async function createTRPCContext(req: NextRequest): Promise<TRPCContext> {
+export async function createTRPCContext(req: ApiRequest): Promise<TRPCContext> {
   const correlationId = req.headers.get("x-correlation-id") ?? generateCorrelationId();
 
   // Autenticação delegada ao middleware de auth (next-auth session token)
@@ -49,7 +50,7 @@ export async function createTRPCContext(req: NextRequest): Promise<TRPCContext> 
 }
 
 // Resolver o usuário da sessão JWT (implementação completa em F0/auth)
-async function resolveUser(req: NextRequest): Promise<AuthUser | null> {
+async function resolveUser(req: ApiRequest): Promise<AuthUser | null> {
   try {
     const authHeader = req.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) return null;

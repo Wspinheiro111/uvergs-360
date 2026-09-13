@@ -12,7 +12,7 @@
  */
 
 import { Queue, Worker } from "bullmq";
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import { withServiceRole } from "@uvergs360/db";
 import { outboxEvents } from "@uvergs360/db/schema";
 import { eq, inArray } from "drizzle-orm";
@@ -110,7 +110,7 @@ export const outboxDispatcher = new Worker(
           await targetQueue.add(
             event.eventType,
             {
-              ...event.payload,
+              ...(typeof event.payload === "object" && event.payload !== null ? event.payload : {}),
               outboxEventId: event.id,
               tenantId: event.tenantId,
               correlationId,

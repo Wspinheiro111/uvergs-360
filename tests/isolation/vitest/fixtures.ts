@@ -151,3 +151,21 @@ export async function withContext(
     await ctx.end();
   }
 }
+
+/** Reproduz uma escrita da aplicação com RLS ativo e sem BYPASSRLS. */
+export async function withWriterContext(
+  tenantId: string,
+  userId: string,
+  query: (sql: ReturnType<typeof postgres>) => Promise<unknown>
+): Promise<unknown> {
+  const ctx = postgres(TEST_DB_URL, { max: 1 });
+  try {
+    await ctx.unsafe(`SET app.current_tenant_id = '${tenantId}'`);
+    await ctx.unsafe(`SET app.current_user_id = '${userId}'`);
+    await ctx.unsafe("SET ROLE app_writer");
+    return await query(ctx);
+  } finally {
+    await ctx.unsafe("RESET ROLE");
+    await ctx.end();
+  }
+}

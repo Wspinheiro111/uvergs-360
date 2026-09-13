@@ -21,7 +21,7 @@ export async function withAdminWrite<T>(
   const client = postgres(dbUrl, { max: 1, idle_timeout: 10, connect_timeout: 10 });
   try {
     const data = await client.begin(async (transaction) => {
-      await transaction`SET LOCAL ROLE service_role`;
+      await transaction`SET LOCAL ROLE app_writer`;
       await transaction`SELECT set_config('app.current_tenant_id', ${context.tenantId}, true)`;
       await transaction`SELECT set_config('app.current_user_id', ${context.userId}, true)`;
       return mutation(transaction as unknown as SqlClient, context as WriteContext);

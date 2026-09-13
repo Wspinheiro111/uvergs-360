@@ -4,9 +4,11 @@ import { loadFinancialDirectory, type PayableStatus, type ReceivableStatus } fro
 
 import { DataNotice } from "../_components/DataNotice";
 import { currency, OverviewPanels, PayablesPanel, ReceivablesPanel, ReportsPanel } from "./_components/FinancePanels";
+import { BudgetPanel, ReconciliationPanel } from "./_components/FinanceOperations";
 
 const VIEWS = [
-  ["overview", "Visão geral"], ["receber", "Contas a receber"], ["pagar", "Contas a pagar"], ["relatorios", "DRE e relatórios"],
+  ["overview", "Visão geral"], ["receber", "Contas a receber"], ["pagar", "Contas a pagar"],
+  ["orcamento", "Orçamento"], ["conciliacao", "Conciliação"], ["relatorios", "DRE e relatórios"],
 ] as const;
 type FinancialView = typeof VIEWS[number][0];
 const RECEIVABLE_STATUSES = new Set<ReceivableStatus>(["open", "overdue", "partial", "paid", "cancelled", "waived"]);
@@ -40,6 +42,8 @@ export default async function FinancialPage({ searchParams }: FinancialPageProps
       {view === "overview" && <OverviewPanels directory={directory} />}
       {view === "receber" && <ReceivablesPanel data={directory.receivables} />}
       {view === "pagar" && <PayablesPanel data={directory.payables} />}
+      {view === "orcamento" && <BudgetPanel data={directory.budgetExecution} />}
+      {view === "conciliacao" && <ReconciliationPanel entries={directory.bankEntries} transactions={directory.transactionOptions} />}
       {view === "relatorios" && <ReportsPanel directory={directory} />}
     </div>}
   </div>;

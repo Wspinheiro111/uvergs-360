@@ -97,6 +97,8 @@ Get-ChildItem packages/db/migrations/*.sql | ForEach-Object {
 
 ```bash
 # Cria tenant UVERGS, admin, roles e flags VAL-LEGAL
+export DEV_ADMIN_PASSWORD="defina-uma-senha-local-forte"
+export DEV_EVENTS_PASSWORD="defina-outra-senha-local-forte"
 node packages/db/seed/dev.seed.mjs
 ```
 
@@ -105,7 +107,7 @@ Resultado esperado:
 ✅ Tenant: uvergs
 ✅ 6 flags VAL-LEGAL criadas (todas desligadas)
 ✅ 10 roles criados
-✅ Admin: admin@uvergs360.dev / Admin@360Dev!
+✅ Admin criado: admin@uvergs360.dev
 ```
 
 ### 7. Rodar o frontend
@@ -123,13 +125,13 @@ Acesse: **http://localhost:3000**
 
 ### Tela de login — `http://localhost:3000/login`
 
-**Credenciais de desenvolvimento:**
+**Acesso de desenvolvimento:**
 
 | Campo | Valor |
 |---|---|
 | Organização | `uvergs` |
 | E-mail | `admin@uvergs360.dev` |
-| Senha | `Admin@360Dev!` |
+| Senha | valor local de `DEV_ADMIN_PASSWORD` |
 
 > 2FA: o admin de dev **não tem 2FA configurado**, então entra direto.
 > Para testar com 2FA, use um usuário com `totp_enabled = true`.

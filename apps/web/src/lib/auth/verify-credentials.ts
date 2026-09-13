@@ -9,6 +9,7 @@ export interface CredentialsInput {
   email: string;
   password: string;
   tenantSlug: string;
+  totpCode?: string;
 }
 
 export interface AuthorizedUser {
@@ -37,7 +38,7 @@ async function openServiceClient(dbUrl: string): Promise<SqlClient> {
 export async function verifyCredentials(
   input: CredentialsInput
 ): Promise<AuthorizedUser | null> {
-  const { email, password, tenantSlug } = input;
+  const { email, password, tenantSlug, totpCode } = input;
 
   // O login ainda não conhece o tenant_id do usuário, portanto não pode
   // consultar `users` sob o RLS de app_user. A conexão de serviço é usada
@@ -65,6 +66,12 @@ export async function verifyCredentials(
       return null;
     }
 
+    const mfaVerified = await verifyMfa(user, totpCode);
+    if (user.totp_enabled && !mfaVerified) {
+      await registerFailedLogin(sql, user.id);
+      return null;
+    }
+
     await registerSuccessfulLogin(sql, user.id);
     const roles = await fetchUserRoles(sql, user.id);
 
@@ -75,10 +82,22 @@ export async function verifyCredentials(
       tenantId: user.tenant_id,
       tenantSlug,
       roles,
-      mfaVerified: false,
+      mfaVerified,
     };
   } finally {
     await sql.end();
+  }
+}
+
+async function verifyMfa(user: UserRow, totpCode?: string): Promise<boolean> {
+  if (!user.totp_enabled) return false;
+  const encryptionKey = process.env.TOTP_ENCRYPTION_KEY;
+  if (!encryptionKey || !user.totp_secret || !totpCode) return false;
+  const { decryptTotpSecret, verifyTotpCode } = await import("./totp");
+  try {
+    return verifyTotpCode(decryptTotpSecret(user.totp_secret, encryptionKey), totpCode);
+  } catch {
+    return false;
   }
 }
 
@@ -99,6 +118,7 @@ interface UserRow {
   password_hash: string;
   status: string;
   totp_enabled: boolean;
+  totp_secret: string | null;
   failed_login_attempts: number;
   locked_until: string | null;
   tenant_id: string;
@@ -126,7 +146,7 @@ async function findActiveUser(
 ): Promise<UserRow | null> {
   const [user] = await sql<UserRow[]>`
     SELECT id, email, display_name, password_hash, status,
-           totp_enabled, failed_login_attempts, locked_until, tenant_id
+           totp_enabled, totp_secret, failed_login_attempts, locked_until, tenant_id
     FROM users
     WHERE email = ${email} AND tenant_id = ${tenantId}
       AND deleted_at IS NULL LIMIT 1
@@ -141,14 +161,18 @@ async function checkPassword(password: string, passwordHash: string): Promise<bo
   const [, salt, storedHash] = passwordHash.split(":");
   if (!salt || !storedHash) return false;
   const inputHash = pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
-  return inputHash === storedHash;
+  const { timingSafeEqual } = await import("crypto");
+  const input = Buffer.from(inputHash, "hex");
+  const stored = Buffer.from(storedHash, "hex");
+  return input.length === stored.length && timingSafeEqual(input, stored);
 }
 
 async function registerFailedLogin(sql: SqlClient, userId: string): Promise<void> {
-  await sql`
-    UPDATE users SET failed_login_attempts = failed_login_attempts + 1,
-    last_failed_login_at = NOW() WHERE id = ${userId}
-  `;
+  await sql`UPDATE users SET
+    failed_login_attempts = failed_login_attempts + 1,
+    last_failed_login_at = NOW(),
+    locked_until = CASE WHEN failed_login_attempts + 1 >= 5 THEN NOW() + INTERVAL '15 minutes' ELSE locked_until END
+    WHERE id = ${userId}`;
 }
 
 async function registerSuccessfulLogin(sql: SqlClient, userId: string): Promise<void> {

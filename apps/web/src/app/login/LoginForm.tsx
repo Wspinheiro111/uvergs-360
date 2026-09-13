@@ -10,7 +10,6 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = getSafeAuthenticatedPath(searchParams.get("callbackUrl"));
-  const [step, setStep] = useState<"credentials" | "2fa">("credentials");
   const [form, setForm] = useState({ tenantSlug: "", email: "", password: "" });
   const [totpCode, setTotpCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,26 +24,9 @@ export default function LoginForm() {
     event.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await signIn("credentials", { ...form, redirect: false });
-      if (!result?.ok) {
-        setError("E-mail, senha ou organização incorretos.");
-        return;
-      }
-      router.push(callbackUrl);
-    });
-  }
-
-  function handleTOTPSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setError(null);
-    if (totpCode.length !== 6) {
-      setError("Código deve ter 6 dígitos.");
-      return;
-    }
-    startTransition(async () => {
       const result = await signIn("credentials", { ...form, totpCode, redirect: false });
       if (!result?.ok) {
-        setError("Código inválido ou expirado.");
+        setError("E-mail, senha ou organização incorretos.");
         return;
       }
       router.push(callbackUrl);
@@ -83,23 +65,13 @@ export default function LoginForm() {
 
             {error && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
-            {step === "credentials" ? (
               <form onSubmit={handleCredentialsSubmit} className="mt-7 space-y-4">
                 <label className="block"><span className="mb-1.5 block text-xs font-semibold text-slate-600">Organização</span><input type="text" name="tenantSlug" value={form.tenantSlug} onChange={handleChange} placeholder="uvergs" className="modern-input" required /></label>
                 <label className="block"><span className="mb-1.5 block text-xs font-semibold text-slate-600">E-mail institucional</span><input type="email" name="email" value={form.email} onChange={handleChange} placeholder="seu@email.com" className="modern-input" required /></label>
                 <label className="block"><span className="mb-1.5 block text-xs font-semibold text-slate-600">Senha</span><input type="password" name="password" value={form.password} onChange={handleChange} className="modern-input" required minLength={8} /></label>
+                <label className="block"><span className="mb-1.5 block text-xs font-semibold text-slate-600">Código 2FA <span className="font-normal text-slate-400">(se estiver ativo)</span></span><input type="text" inputMode="numeric" autoComplete="one-time-code" value={totpCode} onChange={(event) => { setTotpCode(event.target.value.replace(/\D/g, "").slice(0, 6)); setError(null); }} placeholder="000000" maxLength={6} className="modern-input font-mono tracking-[0.25em]" /></label>
                 <button type="submit" disabled={isPending} className="primary-button mt-2 w-full disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50">{isPending ? "Verificando acesso..." : "Entrar no UVERGS 360"}</button>
               </form>
-            ) : (
-              <div className="mt-7">
-                <button onClick={() => setStep("credentials")} className="text-xs font-semibold text-blue-700">← Voltar</button>
-                <p className="mt-4 text-sm text-slate-500">Insira o código de seis dígitos do seu aplicativo autenticador.</p>
-                <form onSubmit={handleTOTPSubmit} className="mt-5 space-y-4">
-                  <input type="text" value={totpCode} onChange={(event) => { setTotpCode(event.target.value.replace(/\D/g, "").slice(0, 6)); setError(null); }} placeholder="000000" maxLength={6} autoFocus className="modern-input h-14 text-center font-mono text-2xl tracking-[0.35em]" />
-                  <button type="submit" disabled={isPending || totpCode.length !== 6} className="primary-button w-full disabled:opacity-50">{isPending ? "Verificando..." : "Confirmar código"}</button>
-                </form>
-              </div>
-            )}
 
             <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-5 text-[11px] text-slate-400"><span>W9 Sistemas</span><span>v0.1.0 · F1</span></div>
           </div>

@@ -93,6 +93,9 @@ importers:
       bullmq:
         specifier: 5.56.0
         version: 5.56.0
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(postgres@3.4.9)
       ioredis:
         specifier: 5.6.1
         version: 5.6.1
@@ -118,6 +121,9 @@ importers:
       '@uvergs360/shared':
         specifier: workspace:*
         version: link:../shared
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(postgres@3.4.9)
       superjson:
         specifier: 2.2.2
         version: 2.2.2
