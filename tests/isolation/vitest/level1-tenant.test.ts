@@ -165,10 +165,25 @@ describe("Nível 1 — Isolamento de Tenant", () => {
   });
 
   it("lançamento contábil postado não pode ser alterado nem excluído", async () => {
-    const [entry] = await sql`
-      INSERT INTO journal_entries (tenant_id, entry_date, memo, source_type, status)
-      VALUES (${ids.tenantAId}, CURRENT_DATE, 'Diário imutável', 'manual', 'posted') RETURNING id
-    `;
+    const entry = await sql.begin(async (tx) => {
+      const [account] = await tx`
+        INSERT INTO accounting_accounts (tenant_id, code, name, nature)
+        VALUES (${ids.tenantAId}, '1.1.TEST', 'Conta para imutabilidade', 'asset') RETURNING id
+      `;
+      const [draft] = await tx`
+        INSERT INTO journal_entries (tenant_id, entry_date, memo, source_type, status)
+        VALUES (${ids.tenantAId}, CURRENT_DATE, 'Diário imutável', 'manual', 'draft') RETURNING id
+      `;
+      await tx`
+        INSERT INTO journal_lines (tenant_id, entry_id, accounting_account_id, debit_cents, credit_cents)
+        VALUES (${ids.tenantAId}, ${draft.id}, ${account.id}, 100, 0),
+          (${ids.tenantAId}, ${draft.id}, ${account.id}, 0, 100)
+      `;
+      const [posted] = await tx`
+        UPDATE journal_entries SET status='posted', posted_at=NOW() WHERE id=${draft.id} RETURNING id
+      `;
+      return posted;
+    });
     await expect(sql`UPDATE journal_entries SET memo='Adulterado' WHERE id=${entry.id}`).rejects.toThrow(/immutable/i);
     await expect(sql`DELETE FROM journal_entries WHERE id=${entry.id}`).rejects.toThrow(/immutable/i);
   });
