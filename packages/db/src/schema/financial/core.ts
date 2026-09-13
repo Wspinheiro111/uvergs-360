@@ -53,6 +53,7 @@ export const payments = pgTable(
     status: text("status", { enum: ["confirmed", "refunded", "reversed"] }).notNull().default("confirmed"),
     providerReference: text("provider_reference"),
     idempotencyKey: text("idempotency_key").notNull(),
+    financialTransactionId: uuid("financial_transaction_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -78,5 +79,8 @@ export const commitments = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("commitments_tenant_status_due_idx").on(table.tenantId, table.status, table.dueDate)]
+  (table) => [
+    unique("commitments_tenant_id_id_unique").on(table.tenantId, table.id),
+    index("commitments_tenant_status_due_idx").on(table.tenantId, table.status, table.dueDate),
+  ]
 );

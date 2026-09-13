@@ -46,6 +46,10 @@ describe("Nível 1 — Isolamento de Tenant", () => {
     const visiblePayments = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM payments`) as { id: string }[];
     expect(visible).toHaveLength(0);
     expect(visiblePayments).toHaveLength(0);
+
+    await sql`INSERT INTO financial_accounts (tenant_id, name, type) VALUES (${ids.tenantAId}, 'Conta Financeira A', 'checking')`;
+    const visibleAccounts = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM financial_accounts`) as { id: string }[];
+    expect(visibleAccounts).toHaveLength(0);
   });
 
   it("Eventos e inscrições não vazam entre tenants", async () => {

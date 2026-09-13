@@ -52,6 +52,18 @@ export async function setupFixtures(): Promise<void> {
 }
 
 export async function teardownFixtures(): Promise<void> {
+  await sql`DELETE FROM journal_lines WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM journal_entries WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM bank_statement_entries WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM budget_lines WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM budgets WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM financial_transactions WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM payables WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM counterparties WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM accounting_accounts WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM funding_projects WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM cost_centers WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM financial_accounts WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM campaign_messages WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM campaigns WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM contact_preferences WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;

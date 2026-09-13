@@ -78,6 +78,13 @@
       "when": 2026091300030,
       "tag": "0011_communication_core",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 2026091300040,
+      "tag": "0012_financial_management",
+      "breakpoints": true
     }
   ]
 }

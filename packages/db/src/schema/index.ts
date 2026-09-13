@@ -16,6 +16,7 @@ export * from "./events/core.ts";
 
 // Financial (F1/F4)
 export * from "./financial/core.ts";
+export * from "./financial/management.ts";
 
 // Communication (F5)
 export * from "./communication/core.ts";
