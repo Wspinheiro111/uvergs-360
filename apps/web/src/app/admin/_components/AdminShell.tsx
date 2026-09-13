@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { SignOutButton } from "./SignOutButton";
 
-type IconName = "home" | "network" | "flags" | "users" | "audit";
+type IconName = "home" | "network" | "events" | "flags" | "users" | "audit";
 
 interface NavItem {
   href: string;
@@ -20,7 +20,13 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   { label: "Visão geral", items: [{ href: "/admin", label: "Painel", icon: "home" }] },
-  { label: "Negócio", items: [{ href: "/admin/institucional", label: "Rede institucional", icon: "network" }] },
+  {
+    label: "Negócio",
+    items: [
+      { href: "/admin/institucional", label: "Rede institucional", icon: "network" },
+      { href: "/admin/eventos", label: "Eventos", icon: "events" },
+    ],
+  },
   {
     label: "Governança",
     items: [
@@ -45,6 +51,7 @@ function NavIcon({ name }: { name: IconName }) {
   const paths: Record<IconName, React.ReactNode> = {
     home: <><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5M9 21v-7h6v7" /></>,
     network: <><circle cx="7" cy="7" r="3" /><circle cx="17" cy="17" r="3" /><path d="m9.5 9.5 5 5M17 3v7M3 17h7" /></>,
+    events: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /><path d="m9 15 2 2 4-4" /></>,
     flags: <><path d="M5 21V4" /><path d="M5 5h11l-2 4 2 4H5" /></>,
     users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
     audit: <><path d="M9 11h6M9 15h6M9 7h3" /><path d="M5 3h14v18H5z" /></>,

@@ -12,6 +12,28 @@ beforeAll(setupFixtures);
 afterAll(teardownFixtures);
 
 describe("Nível 1 — Isolamento de Tenant", () => {
+  it("Eventos e inscrições não vazam entre tenants", async () => {
+    const [eventA] = await sql`
+      INSERT INTO events (tenant_id, title, slug, starts_at, ends_at, status)
+      VALUES (${ids.tenantAId}, 'Evento exclusivo A', 'evento-a', NOW() + INTERVAL '1 day', NOW() + INTERVAL '2 days', 'registration_open')
+      RETURNING id
+    `;
+    await sql`
+      INSERT INTO registrations (tenant_id, event_id, attendee_name, attendee_email, status)
+      VALUES (${ids.tenantAId}, ${eventA?.id}, 'Participante A', 'participante-a@test.uvergs360', 'confirmed')
+    `;
+
+    const visibleEvents = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT title FROM events
+    `) as { title: string }[];
+    const visibleRegistrations = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT attendee_email FROM registrations
+    `) as { attendee_email: string }[];
+
+    expect(visibleEvents).toHaveLength(0);
+    expect(visibleRegistrations).toHaveLength(0);
+  });
+
   it("Câmaras e mandatos institucionais não vazam entre tenants", async () => {
     const [municipality] = await sql`
       INSERT INTO public_ref.municipalities (ibge_code, name, state_code, import_source)

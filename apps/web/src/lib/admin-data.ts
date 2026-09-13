@@ -129,7 +129,7 @@ async function getSessionContext(allowedRoles: string[]): Promise<AdminDataResul
   return { data: { userId, tenantId, roles }, error: null };
 }
 
-async function withAdminRead<T>(
+export async function withAdminRead<T>(
   allowedRoles: string[],
   query: (sql: SqlClient) => Promise<T>
 ): Promise<AdminDataResult<T>> {

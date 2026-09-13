@@ -12,10 +12,7 @@ export * from "./platform/audit.ts";
 export * from "./institutional/core.ts";
 
 // Events (F1)
-// export * from "./events/event.ts";
-// export * from "./events/registration.ts";
-// export * from "./events/attendance.ts";
-// export * from "./events/attendance-policy.ts";
+export * from "./events/core.ts";
 
 // Financial (F1/F4)
 // export * from "./financial/receivable.ts";

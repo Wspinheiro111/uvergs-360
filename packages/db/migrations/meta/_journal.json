@@ -57,6 +57,13 @@
       "when": 2026091200020,
       "tag": "0008_institutional_core",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 2026091300010,
+      "tag": "0009_events_core",
+      "breakpoints": true
     }
   ]
 }
