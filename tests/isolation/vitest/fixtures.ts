@@ -52,8 +52,16 @@ export async function setupFixtures(): Promise<void> {
 }
 
 export async function teardownFixtures(): Promise<void> {
-  await sql`DELETE FROM journal_lines WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
-  await sql`DELETE FROM journal_entries WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql.begin(async (tx) => {
+    // O banco de teste é descartável. A aplicação nunca desativa estas travas;
+    // o teardown precisa fazê-lo apenas para remover fixtures postadas imutáveis.
+    await tx`ALTER TABLE journal_lines DISABLE TRIGGER journal_lines_immutability`;
+    await tx`ALTER TABLE journal_entries DISABLE TRIGGER journal_entries_immutability`;
+    await tx`DELETE FROM journal_lines WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+    await tx`DELETE FROM journal_entries WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+    await tx`ALTER TABLE journal_lines ENABLE TRIGGER journal_lines_immutability`;
+    await tx`ALTER TABLE journal_entries ENABLE TRIGGER journal_entries_immutability`;
+  });
   await sql`DELETE FROM bank_statement_entries WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM budget_lines WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM budgets WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
