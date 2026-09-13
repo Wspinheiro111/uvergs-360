@@ -52,6 +52,9 @@ export async function setupFixtures(): Promise<void> {
 }
 
 export async function teardownFixtures(): Promise<void> {
+  await sql`DELETE FROM campaign_messages WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM campaigns WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM contact_preferences WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM payments WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM receivables WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
   await sql`DELETE FROM commitments WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;

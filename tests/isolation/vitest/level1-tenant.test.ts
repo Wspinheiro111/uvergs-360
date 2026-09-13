@@ -12,6 +12,18 @@ beforeAll(setupFixtures);
 afterAll(teardownFixtures);
 
 describe("Nível 1 — Isolamento de Tenant", () => {
+  it("Campanhas e mensagens não vazam entre tenants", async () => {
+    const [campaign] = await sql`
+      INSERT INTO campaigns (tenant_id, name, channel, status, audience, content, legal_basis)
+      VALUES (${ids.tenantAId}, 'Campanha exclusiva A', 'email', 'draft', 'custom', 'Conteúdo de teste', 'consent') RETURNING id
+    `;
+    await sql`INSERT INTO campaign_messages (tenant_id, campaign_id, recipient_address, idempotency_key) VALUES (${ids.tenantAId}, ${campaign?.id}, 'destinatario@test.uvergs360', 'campaign-message-a')`;
+    const visibleCampaigns = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM campaigns`) as { id: string }[];
+    const visibleMessages = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM campaign_messages`) as { id: string }[];
+    expect(visibleCampaigns).toHaveLength(0);
+    expect(visibleMessages).toHaveLength(0);
+  });
+
   it("Cobranças e pagamentos não vazam entre tenants", async () => {
     const [municipality] = await sql`
       INSERT INTO public_ref.municipalities (ibge_code, name, state_code, import_source)

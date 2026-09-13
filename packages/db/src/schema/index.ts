@@ -18,8 +18,7 @@ export * from "./events/core.ts";
 export * from "./financial/core.ts";
 
 // Communication (F5)
-// export * from "./communication/campaign.ts";
-// export * from "./communication/message.ts";
+export * from "./communication/core.ts";
 
 // Privacy (LGPD)
 // export * from "./privacy/consent.ts";

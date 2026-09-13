@@ -71,6 +71,13 @@
       "when": 2026091300020,
       "tag": "0010_financial_core",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 2026091300030,
+      "tag": "0011_communication_core",
+      "breakpoints": true
     }
   ]
 }
