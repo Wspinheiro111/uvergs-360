@@ -15,9 +15,7 @@ export * from "./institutional/core.ts";
 export * from "./events/core.ts";
 
 // Financial (F1/F4)
-// export * from "./financial/receivable.ts";
-// export * from "./financial/payment.ts";
-// export * from "./financial/commitment.ts";
+export * from "./financial/core.ts";
 
 // Communication (F5)
 // export * from "./communication/campaign.ts";

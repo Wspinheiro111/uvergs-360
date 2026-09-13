@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { SignOutButton } from "./SignOutButton";
 
-type IconName = "home" | "network" | "events" | "flags" | "users" | "audit";
+type IconName = "home" | "network" | "events" | "finance" | "flags" | "users" | "audit";
 
 interface NavItem {
   href: string;
@@ -25,6 +25,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/admin/institucional", label: "Rede institucional", icon: "network" },
       { href: "/admin/eventos", label: "Eventos", icon: "events" },
+      { href: "/admin/financeiro", label: "Financeiro", icon: "finance" },
     ],
   },
   {
@@ -52,6 +53,7 @@ function NavIcon({ name }: { name: IconName }) {
     home: <><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5M9 21v-7h6v7" /></>,
     network: <><circle cx="7" cy="7" r="3" /><circle cx="17" cy="17" r="3" /><path d="m9.5 9.5 5 5M17 3v7M3 17h7" /></>,
     events: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /><path d="m9 15 2 2 4-4" /></>,
+    finance: <><circle cx="12" cy="12" r="9" /><path d="M16 8.5c-.8-.8-2-1.2-3.5-1.2-2 0-3.5 1-3.5 2.5s1.2 2.2 3.4 2.6c2.3.4 3.6 1.1 3.6 2.6s-1.5 2.5-3.7 2.5c-1.6 0-3-.5-4-1.5M12 5v14" /></>,
     flags: <><path d="M5 21V4" /><path d="M5 5h11l-2 4 2 4H5" /></>,
     users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
     audit: <><path d="M9 11h6M9 15h6M9 7h3" /><path d="M5 3h14v18H5z" /></>,

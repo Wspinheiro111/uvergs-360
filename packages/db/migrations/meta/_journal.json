@@ -64,6 +64,13 @@
       "when": 2026091300010,
       "tag": "0009_events_core",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 2026091300020,
+      "tag": "0010_financial_core",
+      "breakpoints": true
     }
   ]
 }

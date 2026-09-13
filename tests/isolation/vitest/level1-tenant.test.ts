@@ -12,6 +12,30 @@ beforeAll(setupFixtures);
 afterAll(teardownFixtures);
 
 describe("Nível 1 — Isolamento de Tenant", () => {
+  it("Cobranças e pagamentos não vazam entre tenants", async () => {
+    const [municipality] = await sql`
+      INSERT INTO public_ref.municipalities (ibge_code, name, state_code, import_source)
+      VALUES ('9999999', 'Município de Teste', 'RS', 'ci')
+      ON CONFLICT (ibge_code, state_code) DO UPDATE SET name = EXCLUDED.name
+      RETURNING id
+    `;
+    const [chamberA] = await sql`
+      INSERT INTO chambers (tenant_id, municipality_id, legal_name, affiliation_status)
+      VALUES (${ids.tenantAId}, ${municipality?.id}, 'Câmara do Tenant A', 'affiliated')
+      ON CONFLICT (tenant_id, municipality_id) DO UPDATE SET legal_name = EXCLUDED.legal_name
+      RETURNING id
+    `;
+    const [charge] = await sql`
+      INSERT INTO receivables (tenant_id, chamber_id, kind, description, due_date, amount_cents, status)
+      VALUES (${ids.tenantAId}, ${chamberA.id}, 'membership', 'Anuidade de teste', CURRENT_DATE, 10000, 'open') RETURNING id
+    `;
+    await sql`INSERT INTO payments (tenant_id, receivable_id, amount_cents, paid_at, method, idempotency_key) VALUES (${ids.tenantAId}, ${charge?.id}, 5000, NOW(), 'pix', 'payment-test-a')`;
+    const visible = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM receivables`) as { id: string }[];
+    const visiblePayments = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM payments`) as { id: string }[];
+    expect(visible).toHaveLength(0);
+    expect(visiblePayments).toHaveLength(0);
+  });
+
   it("Eventos e inscrições não vazam entre tenants", async () => {
     const [eventA] = await sql`
       INSERT INTO events (tenant_id, title, slug, starts_at, ends_at, status)
