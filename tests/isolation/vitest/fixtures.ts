@@ -52,8 +52,87 @@ export async function setupFixtures(): Promise<void> {
 }
 
 export async function teardownFixtures(): Promise<void> {
+  await sql.begin(async (tx) => {
+    // O banco de teste é descartável. A aplicação nunca desativa estas travas;
+    // o teardown precisa fazê-lo apenas para remover fixtures postadas imutáveis.
+    await tx`ALTER TABLE journal_lines DISABLE TRIGGER USER`;
+    await tx`ALTER TABLE journal_entries DISABLE TRIGGER USER`;
+    await tx`DELETE FROM journal_lines WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+    await tx`DELETE FROM journal_entries WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+    await tx`ALTER TABLE journal_lines ENABLE TRIGGER USER`;
+    await tx`ALTER TABLE journal_entries ENABLE TRIGGER USER`;
+  });
+  await sql`DELETE FROM bank_statement_entries WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM budget_lines WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM budgets WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM financial_transactions WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM payables WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM counterparties WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM accounting_accounts WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM funding_projects WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM cost_centers WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM financial_accounts WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM campaign_messages WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM campaigns WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM contact_preferences WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM payments WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM receivables WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`DELETE FROM commitments WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')`;
+  await sql`
+    DELETE FROM certificates
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM registrations
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM event_sessions
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM events
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM mandates
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM persons
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM chambers
+    WHERE tenant_id IN (SELECT id FROM tenants WHERE slug LIKE '%-test')
+  `;
+  await sql`
+    DELETE FROM signed_access_links
+    WHERE created_by IN (
+      SELECT id FROM users WHERE email LIKE '%@test.uvergs360'
+    )
+  `;
+  await sql`
+    DELETE FROM outbox_events
+    WHERE tenant_id IN (
+      SELECT id FROM tenants WHERE slug LIKE '%-test'
+    )
+  `;
+  await sql`
+    DELETE FROM feature_flags
+    WHERE tenant_id IN (
+      SELECT id FROM tenants WHERE slug LIKE '%-test'
+    )
+  `;
+  await sql`
+    DELETE FROM audit_logs
+    WHERE tenant_id IN (
+      SELECT id FROM tenants WHERE slug LIKE '%-test'
+    )
+  `;
   await sql`DELETE FROM users WHERE email LIKE '%@test.uvergs360'`;
   await sql`DELETE FROM tenants WHERE slug LIKE '%-test'`;
+  await sql`DELETE FROM public_ref.municipalities WHERE ibge_code = '9999999'`;
   await sql.end();
 }
 
@@ -77,6 +156,24 @@ export async function withContext(
     return await query(ctx);
   } finally {
     await ctx.unsafe(`RESET ROLE`);
+    await ctx.end();
+  }
+}
+
+/** Reproduz uma escrita da aplicação com RLS ativo e sem BYPASSRLS. */
+export async function withWriterContext(
+  tenantId: string,
+  userId: string,
+  query: (sql: ReturnType<typeof postgres>) => Promise<unknown>
+): Promise<unknown> {
+  const ctx = postgres(TEST_DB_URL, { max: 1 });
+  try {
+    await ctx.unsafe(`SET app.current_tenant_id = '${tenantId}'`);
+    await ctx.unsafe(`SET app.current_user_id = '${userId}'`);
+    await ctx.unsafe("SET ROLE app_writer");
+    return await query(ctx);
+  } finally {
+    await ctx.unsafe("RESET ROLE");
     await ctx.end();
   }
 }

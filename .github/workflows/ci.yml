@@ -25,8 +25,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -73,8 +71,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -129,8 +125,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -190,8 +184,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -205,14 +197,14 @@ jobs:
         run: |
           PGPASSWORD=uvergs360_test_secret psql \
             -h localhost -p 5433 -U uvergs360 -d uvergs360_test \
-            -f packages/db/init/00_roles_and_extensions.sql
+            -f init/00_roles_and_extensions.sql
           pnpm db:migrate
         working-directory: packages/db
         env:
           DATABASE_URL: postgresql://uvergs360:uvergs360_test_secret@localhost:5433/uvergs360_test
 
       - name: Executar testes de isolamento (Nível 1 — Tenant)
-        run: pnpm vitest run tests/isolation/vitest --reporter=verbose
+        run: pnpm vitest run tests/isolation/vitest --reporter=verbose --no-file-parallelism
 
       - name: Upload relatório de isolamento
         if: always()
@@ -233,8 +225,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -245,7 +235,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Executar testes unitários
-        run: pnpm vitest run --reporter=verbose
+        run: pnpm vitest run tests/unit --reporter=verbose
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -296,8 +286,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:

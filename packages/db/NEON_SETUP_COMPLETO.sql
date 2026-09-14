@@ -4,7 +4,7 @@
 --
 -- COMO USAR:
 --   1. Acesse https://console.neon.tech → seu projeto → SQL Editor
---   2. Cole TODO este arquivo
+--   2. Cole o conteúdo completo deste arquivo
 --   3. Clique em Run
 --
 -- Cria: extensions, roles, schemas, 34 tabelas, RLS, políticas,
@@ -67,10 +67,10 @@ BEGIN
 END
 $$;
 
--- Conceder roles ao usuário da aplicação
-GRANT app_user TO uvergs360;
-GRANT service_role TO uvergs360;
-GRANT readonly_role TO uvergs360;
+-- Permitir que a role proprietária da conexão alterne para as roles da
+-- aplicação. CURRENT_USER mantém o bootstrap portável entre Docker
+-- (uvergs360), Neon (neondb_owner) e outros ambientes PostgreSQL.
+GRANT app_user, service_role, readonly_role TO CURRENT_USER;
 
 -- ---------------------------------------------------------------------------
 -- SCHEMAS
@@ -1019,7 +1019,7 @@ CREATE POLICY security_incidents_tenant_isolation ON security_incidents
 GRANT SELECT ON audit_logs, personal_data_access_logs TO app_user;
 GRANT SELECT, INSERT, UPDATE ON
   outbox_events, notifications, file_assets,
-  usage_meters, security_incidents, import_batches
+  usage_meters, security_incidents
 TO app_user;
 
 -- ═══ MIGRATION 0005_global_references.sql ═══
@@ -1317,15 +1317,8 @@ CROSS JOIN (VALUES
 WHERE t.slug = 'uvergs'
 ON CONFLICT (tenant_id, name) DO UPDATE SET display_name = EXCLUDED.display_name;
 
--- ─── USUÁRIO ADMIN ───
--- Senha: Admin@360Dev!  (hash pbkdf2-sha512, 100000 iterações)
--- TROCAR EM PRODUÇÃO
-INSERT INTO users (tenant_id, email, email_verified, display_name, password_hash, status, locale, timezone)
-SELECT id, 'admin@uvergs360.dev', true, 'Administrador (Dev)',
-  'pbkdf2:8f3a2b1c9d4e5f60718293a4b5c6d7e8:c4a8f2e1b7d3956028f4e7a1c5b9d2836f4a7e1c9b5d3827f6a4e2c8b1d5937a4f8e2c6b9d1537a8e4c2f6b9d3517a8e4c2f6b9d35',
-  'active', 'pt-BR', 'America/Sao_Paulo'
-FROM tenants WHERE slug = 'uvergs'
-ON CONFLICT (email, tenant_id) DO UPDATE SET display_name = EXCLUDED.display_name;
+-- Usuários administrativos devem ser provisionados separadamente com uma
+-- credencial gerada por mecanismo seguro. Este script não contém senhas.
 
 -- ─── VÍNCULO ADMIN → ROLE admin_global ───
 INSERT INTO user_roles (tenant_id, user_id, role_id)

@@ -1,0 +1,111 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 2026090100010,
+      "tag": "0001_extensions_and_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 2026090100020,
+      "tag": "0002_tenants",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 2026090100030,
+      "tag": "0003_auth",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 2026090100040,
+      "tag": "0004_audit_and_platform",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 2026090100050,
+      "tag": "0005_global_references",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 2026090100060,
+      "tag": "0006_dev_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 2026091200010,
+      "tag": "0007_service_role_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 2026091200020,
+      "tag": "0008_institutional_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 2026091300010,
+      "tag": "0009_events_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 2026091300020,
+      "tag": "0010_financial_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 2026091300030,
+      "tag": "0011_communication_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 2026091300040,
+      "tag": "0012_financial_management",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 2026091300050,
+      "tag": "0013_financial_operations",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 2026091300060,
+      "tag": "0014_financial_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 2026091400010,
+      "tag": "0015_institutional_directory",
+      "breakpoints": true
+    }
+  ]
+}

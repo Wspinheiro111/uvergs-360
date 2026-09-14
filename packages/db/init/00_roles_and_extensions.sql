@@ -31,6 +31,15 @@ BEGIN
 END
 $$;
 
+-- Role de escrita operacional — RLS permanece obrigatório.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_writer') THEN
+    CREATE ROLE app_writer NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+  END IF;
+END
+$$;
+
 -- Role de serviço (worker, migrations, jobs) — RLS BYPASS
 -- NUNCA expor via API pública ou frontend
 -- Usar apenas em contextos controlados de backend
@@ -51,10 +60,11 @@ BEGIN
 END
 $$;
 
--- Conceder roles ao usuário da aplicação
-GRANT app_user TO uvergs360;
-GRANT service_role TO uvergs360;
-GRANT readonly_role TO uvergs360;
+-- Permitir que a role proprietária da conexão alterne para as roles da
+-- aplicação. CURRENT_USER mantém o bootstrap portável entre Docker
+-- (uvergs360), Neon (neondb_owner) e outros ambientes PostgreSQL.
+GRANT app_user, app_writer, service_role, readonly_role TO CURRENT_USER;
+GRANT app_writer TO service_role;
 
 -- ---------------------------------------------------------------------------
 -- SCHEMAS
@@ -72,8 +82,8 @@ CREATE SCHEMA IF NOT EXISTS public_ref;
 CREATE SCHEMA IF NOT EXISTS audit;
 
 -- Permissões de schema por role
-GRANT USAGE ON SCHEMA app TO app_user, service_role, readonly_role;
-GRANT USAGE ON SCHEMA public_ref TO app_user, service_role, readonly_role;
+GRANT USAGE ON SCHEMA app TO app_user, app_writer, service_role, readonly_role;
+GRANT USAGE ON SCHEMA public_ref TO app_user, app_writer, service_role, readonly_role;
 GRANT USAGE ON SCHEMA audit TO service_role, readonly_role;
 -- app_user NÃO tem acesso direto ao schema audit (apenas via service_role)
 
@@ -82,7 +92,15 @@ GRANT USAGE ON SCHEMA audit TO service_role, readonly_role;
 -- ---------------------------------------------------------------------------
 
 -- Timezone padrão: UTC (exibição em America/Sao_Paulo na aplicação)
-ALTER DATABASE uvergs360_dev SET timezone = 'UTC';
+DO $$
+BEGIN
+  EXECUTE format(
+    'ALTER DATABASE %I SET timezone TO %L',
+    current_database(),
+    'UTC'
+  );
+END
+$$;
 
 -- Desabilitar acesso a tabelas sem permissão explícita
 ALTER DEFAULT PRIVILEGES IN SCHEMA app

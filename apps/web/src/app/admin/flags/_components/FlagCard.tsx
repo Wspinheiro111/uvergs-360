@@ -1,16 +1,12 @@
-// Card individual de uma feature flag. Extraído de page.tsx — era o bloco
-// de UI dentro do .map() de flags (prompt 02 — burn-down de
-// max-lines-per-function). Nenhuma classe, condição ou texto mudou.
+import type { FeatureFlagRow } from "@/lib/admin-data";
 
-import type { FeatureFlag } from "../_lib/mock-data";
-import { CATEGORY_LABELS, CATEGORY_COLORS } from "../_lib/mock-data";
+import { CATEGORY_LABELS, CATEGORY_COLORS } from "../_lib/flag-presentation";
 
 interface FlagCardProps {
-  flag: FeatureFlag;
-  isToggling: boolean;
+  flag: FeatureFlagRow;
 }
 
-export function FlagCard({ flag, isToggling }: FlagCardProps) {
+export function FlagCard({ flag }: FlagCardProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-start justify-between gap-4">
       <div className="flex-1 min-w-0">
@@ -34,29 +30,20 @@ export function FlagCard({ flag, isToggling }: FlagCardProps) {
 
         {flag.lastChangedAt && (
           <p className="text-xs text-slate-400 mt-2">
-            Última alteração: {new Date(flag.lastChangedAt).toLocaleString("pt-BR")}
+            Última alteração: {flag.lastChangedAt.toLocaleString("pt-BR")}
             {flag.lastChangeReason && ` — "${flag.lastChangeReason}"`}
           </p>
         )}
       </div>
 
       <div className="flex-shrink-0">
-        {/* Toggle visual (ação real via modal com justificativa) */}
-        <button
-          disabled={isToggling}
+        <span
+          role="status"
+          aria-label={flag.enabled ? "Funcionalidade habilitada" : "Funcionalidade desabilitada"}
           className={`
             relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
             ${flag.enabled ? "bg-blue-600" : "bg-slate-200"}
-            ${isToggling ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
           `}
-          title={
-            flag.category === "val_legal" && !flag.enabled
-              ? "Requer aprovação jurídica"
-              : flag.enabled
-              ? "Desabilitar"
-              : "Habilitar"
-          }
         >
           <span
             className={`
@@ -64,7 +51,7 @@ export function FlagCard({ flag, isToggling }: FlagCardProps) {
               ${flag.enabled ? "translate-x-6" : "translate-x-1"}
             `}
           />
-        </button>
+        </span>
       </div>
     </div>
   );

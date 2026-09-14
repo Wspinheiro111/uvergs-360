@@ -101,7 +101,12 @@ async function seed() {
 
   // ─── USUÁRIO ADMIN ───
   console.log("  Criando usuário admin de desenvolvimento...");
-  const adminPassword = hashPassword("Admin@360Dev!");
+  const adminPlainPassword = process.env.DEV_ADMIN_PASSWORD;
+  const eventsPlainPassword = process.env.DEV_EVENTS_PASSWORD;
+  if (!adminPlainPassword || !eventsPlainPassword) {
+    throw new Error("Defina DEV_ADMIN_PASSWORD e DEV_EVENTS_PASSWORD antes de executar o seed.");
+  }
+  const adminPassword = hashPassword(adminPlainPassword);
   const [admin] = await sql`
     INSERT INTO users (tenant_id, email, email_verified, display_name, password_hash, status, locale, timezone)
     VALUES (
@@ -117,8 +122,7 @@ async function seed() {
     ON CONFLICT (email, tenant_id) DO UPDATE SET display_name = EXCLUDED.display_name
     RETURNING id, email
   `;
-  console.log(`     ✅ Admin: ${admin.email} / senha: Admin@360Dev!`);
-  console.log(`        ⚠️  Trocar senha antes de usar em produção!`);
+  console.log(`     ✅ Admin criado: ${admin.email}`);
 
   // ─── VÍNCULO ADMIN → ROLE ───
   await sql`
@@ -129,7 +133,7 @@ async function seed() {
   console.log("     ✅ Role admin_global vinculado");
 
   // ─── USUÁRIO DE EVENTOS (sem 2FA) ───
-  const eventsPassword = hashPassword("Eventos@360Dev!");
+  const eventsPassword = hashPassword(eventsPlainPassword);
   const [eventsUser] = await sql`
     INSERT INTO users (tenant_id, email, email_verified, display_name, password_hash, status)
     VALUES (${tenant.id}, 'eventos@uvergs360.dev', true, 'Gestor de Eventos (Dev)', ${eventsPassword}, 'active')
@@ -141,15 +145,10 @@ async function seed() {
     VALUES (${tenant.id}, ${eventsUser.id}, ${createdRoles["events"]})
     ON CONFLICT (user_id, role_id, chamber_id) DO NOTHING
   `;
-  console.log(`     ✅ Eventos: ${eventsUser.email} / senha: Eventos@360Dev!`);
+  console.log(`     ✅ Eventos criado: ${eventsUser.email}`);
 
   console.log("\n✅ Seed concluído!\n");
-  console.log("  Credenciais de desenvolvimento:");
-  console.log("  ┌─────────────────────────────────────────────┐");
-  console.log("  │ admin@uvergs360.dev   Admin@360Dev!         │");
-  console.log("  │ eventos@uvergs360.dev Eventos@360Dev!       │");
-  console.log("  │ Tenant slug: uvergs                         │");
-  console.log("  └─────────────────────────────────────────────┘");
+  console.log("  Credenciais definidas exclusivamente pelas variáveis de ambiente.");
 }
 
 seed()

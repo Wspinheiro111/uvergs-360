@@ -19,7 +19,7 @@ export default {
   },
   // Naming convention das migrations: 0001_nome_descritivo.sql
   migrations: {
-    prefix: "sequential",
+    prefix: "index",
   },
   // Verificação estrita: falha se schema e banco divergem inesperadamente
   strict: true,

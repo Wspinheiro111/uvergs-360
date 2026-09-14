@@ -44,13 +44,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        // TODO(#55): totpCode ainda não é verificado contra user.totp_enabled.
-        // Declarado no schema e no formulário; a checagem em si entra junto
-        // com otplib (ver docs/IMPLEMENTATION_STATUS.md, item 2FA TOTP).
-        const { email, password, tenantSlug, totpCode: _totpCode } = parsed.data;
+        const { email, password, tenantSlug, totpCode } = parsed.data;
 
         try {
-          const user = await verifyCredentials({ email, password, tenantSlug });
+          const user = await verifyCredentials({ email, password, tenantSlug, totpCode });
           return user;
         } catch (err) {
           logger.error("Auth error", err);

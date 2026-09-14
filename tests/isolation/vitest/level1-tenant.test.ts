@@ -6,12 +6,111 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { sql, ids, setupFixtures, teardownFixtures, withContext } from "./fixtures";
+import { sql, ids, setupFixtures, teardownFixtures, withContext, withWriterContext } from "./fixtures";
 
 beforeAll(setupFixtures);
 afterAll(teardownFixtures);
 
 describe("Nível 1 — Isolamento de Tenant", () => {
+  it("Campanhas e mensagens não vazam entre tenants", async () => {
+    const [campaign] = await sql`
+      INSERT INTO campaigns (tenant_id, name, channel, status, audience, content, legal_basis)
+      VALUES (${ids.tenantAId}, 'Campanha exclusiva A', 'email', 'draft', 'custom', 'Conteúdo de teste', 'consent') RETURNING id
+    `;
+    await sql`INSERT INTO campaign_messages (tenant_id, campaign_id, recipient_address, idempotency_key) VALUES (${ids.tenantAId}, ${campaign?.id}, 'destinatario@test.uvergs360', 'campaign-message-a')`;
+    const visibleCampaigns = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM campaigns`) as { id: string }[];
+    const visibleMessages = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM campaign_messages`) as { id: string }[];
+    expect(visibleCampaigns).toHaveLength(0);
+    expect(visibleMessages).toHaveLength(0);
+  });
+
+  it("Cobranças e pagamentos não vazam entre tenants", async () => {
+    const [municipality] = await sql`
+      INSERT INTO public_ref.municipalities (ibge_code, name, state_code, import_source)
+      VALUES ('9999999', 'Município de Teste', 'RS', 'ci')
+      ON CONFLICT (ibge_code, state_code) DO UPDATE SET name = EXCLUDED.name
+      RETURNING id
+    `;
+    const [chamberA] = await sql`
+      INSERT INTO chambers (tenant_id, municipality_id, legal_name, affiliation_status)
+      VALUES (${ids.tenantAId}, ${municipality?.id}, 'Câmara do Tenant A', 'affiliated')
+      ON CONFLICT (tenant_id, municipality_id) DO UPDATE SET legal_name = EXCLUDED.legal_name
+      RETURNING id
+    `;
+    const [charge] = await sql`
+      INSERT INTO receivables (tenant_id, chamber_id, kind, description, due_date, amount_cents, status)
+      VALUES (${ids.tenantAId}, ${chamberA.id}, 'membership', 'Anuidade de teste', CURRENT_DATE, 10000, 'open') RETURNING id
+    `;
+    await sql`INSERT INTO payments (tenant_id, receivable_id, amount_cents, paid_at, method, idempotency_key) VALUES (${ids.tenantAId}, ${charge?.id}, 5000, NOW(), 'pix', 'payment-test-a')`;
+    const visible = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM receivables`) as { id: string }[];
+    const visiblePayments = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM payments`) as { id: string }[];
+    expect(visible).toHaveLength(0);
+    expect(visiblePayments).toHaveLength(0);
+
+    await sql`INSERT INTO financial_accounts (tenant_id, name, type) VALUES (${ids.tenantAId}, 'Conta Financeira A', 'checking')`;
+    const visibleAccounts = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`SELECT id FROM financial_accounts`) as { id: string }[];
+    expect(visibleAccounts).toHaveLength(0);
+  });
+
+  it("Eventos e inscrições não vazam entre tenants", async () => {
+    const [eventA] = await sql`
+      INSERT INTO events (tenant_id, title, slug, starts_at, ends_at, status)
+      VALUES (${ids.tenantAId}, 'Evento exclusivo A', 'evento-a', NOW() + INTERVAL '1 day', NOW() + INTERVAL '2 days', 'registration_open')
+      RETURNING id
+    `;
+    await sql`
+      INSERT INTO registrations (tenant_id, event_id, attendee_name, attendee_email, status)
+      VALUES (${ids.tenantAId}, ${eventA?.id}, 'Participante A', 'participante-a@test.uvergs360', 'confirmed')
+    `;
+
+    const visibleEvents = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT title FROM events
+    `) as { title: string }[];
+    const visibleRegistrations = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT attendee_email FROM registrations
+    `) as { attendee_email: string }[];
+
+    expect(visibleEvents).toHaveLength(0);
+    expect(visibleRegistrations).toHaveLength(0);
+  });
+
+  it("Câmaras e mandatos institucionais não vazam entre tenants", async () => {
+    const [municipality] = await sql`
+      INSERT INTO public_ref.municipalities (ibge_code, name, state_code, import_source)
+      VALUES ('9999999', 'Município de Teste', 'RS', 'ci')
+      ON CONFLICT (ibge_code, state_code) DO UPDATE SET name = EXCLUDED.name
+      RETURNING id
+    `;
+    const chambers = await sql`
+      INSERT INTO chambers (tenant_id, municipality_id, legal_name, affiliation_status)
+      VALUES
+        (${ids.tenantAId}, ${municipality?.id}, 'Câmara do Tenant A', 'affiliated'),
+        (${ids.tenantBId}, ${municipality?.id}, 'Câmara do Tenant B', 'prospect')
+      ON CONFLICT (tenant_id, municipality_id) DO UPDATE SET legal_name = EXCLUDED.legal_name
+      RETURNING id, tenant_id
+    `;
+    const chamberA = chambers.find((chamber) => chamber.tenant_id === ids.tenantAId);
+    const personA = await sql`
+      INSERT INTO persons (tenant_id, full_name)
+      VALUES (${ids.tenantAId}, 'Pessoa Institucional A')
+      RETURNING id
+    `;
+    await sql`
+      INSERT INTO mandates (tenant_id, person_id, chamber_id, started_at)
+      VALUES (${ids.tenantAId}, ${personA[0]?.id}, ${chamberA?.id}, '2025-01-01')
+    `;
+
+    const visibleChambers = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT legal_name FROM chambers ORDER BY legal_name
+    `) as { legal_name: string }[];
+    const visibleMandates = await withContext(ids.tenantBId, ids.userB1Id, async (ctxSql) => ctxSql`
+      SELECT id FROM mandates
+    `) as { id: string }[];
+
+    expect(visibleChambers.map((chamber) => chamber.legal_name)).toEqual(["Câmara do Tenant B"]);
+    expect(visibleMandates).toHaveLength(0);
+  });
+
   it("Tenant A não consegue ler registros do Tenant B via RLS", async () => {
     // Criar uma feature_flag no Tenant B
     await sql`
@@ -54,6 +153,39 @@ describe("Nível 1 — Isolamento de Tenant", () => {
         VALUES (${ids.tenantBId}, 'INJECTION_ATTEMPT', true, 'Tentativa de injeção cross-tenant')
       `)
     ).rejects.toThrow(); // RLS rejeita INSERT com tenant_id diferente do contexto
+  });
+
+  it("app_writer não pode gravar um título no tenant de outra sessão", async () => {
+    await expect(
+      withWriterContext(ids.tenantAId, ids.userA1Id, async (ctxSql) => ctxSql`
+        INSERT INTO receivables (tenant_id, debtor_name, kind, description, due_date, amount_cents, status)
+        VALUES (${ids.tenantBId}, 'Invasor', 'other', 'Escrita cruzada', CURRENT_DATE, 100, 'open')
+      `)
+    ).rejects.toThrow();
+  });
+
+  it("lançamento contábil postado não pode ser alterado nem excluído", async () => {
+    const entry = await sql.begin(async (tx) => {
+      const [account] = await tx`
+        INSERT INTO accounting_accounts (tenant_id, code, name, nature)
+        VALUES (${ids.tenantAId}, '1.1.TEST', 'Conta para imutabilidade', 'asset') RETURNING id
+      `;
+      const [draft] = await tx`
+        INSERT INTO journal_entries (tenant_id, entry_date, memo, source_type, status)
+        VALUES (${ids.tenantAId}, CURRENT_DATE, 'Diário imutável', 'manual', 'draft') RETURNING id
+      `;
+      await tx`
+        INSERT INTO journal_lines (tenant_id, entry_id, accounting_account_id, debit_cents, credit_cents)
+        VALUES (${ids.tenantAId}, ${draft.id}, ${account.id}, 100, 0),
+          (${ids.tenantAId}, ${draft.id}, ${account.id}, 0, 100)
+      `;
+      const [posted] = await tx`
+        UPDATE journal_entries SET status='posted', posted_at=NOW() WHERE id=${draft.id} RETURNING id
+      `;
+      return posted;
+    });
+    await expect(sql`UPDATE journal_entries SET memo='Adulterado' WHERE id=${entry.id}`).rejects.toThrow(/immutable/i);
+    await expect(sql`DELETE FROM journal_entries WHERE id=${entry.id}`).rejects.toThrow(/immutable/i);
   });
 
   it("Tentativa de leitura cross-tenant é registrada no AuditLog", async () => {
