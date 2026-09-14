@@ -99,6 +99,13 @@
       "when": 2026091300060,
       "tag": "0014_financial_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 2026091400010,
+      "tag": "0015_institutional_directory",
+      "breakpoints": true
     }
   ]
 }
