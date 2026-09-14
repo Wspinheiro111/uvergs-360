@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import { loadFinancialDirectory, type PayableStatus, type ReceivableStatus } from "@/lib/financial-data";
+import { currency } from "@/lib/format";
 
 import { DataNotice } from "../_components/DataNotice";
-import { currency, OverviewPanels, PayablesPanel, ReceivablesPanel, ReportsPanel } from "./_components/FinancePanels";
+import { OverviewPanels, PayablesPanel, ReceivablesPanel, ReportsPanel } from "./_components/FinancePanels";
 import { BudgetPanel, ReconciliationPanel } from "./_components/FinanceOperations";
 
 const VIEWS = [

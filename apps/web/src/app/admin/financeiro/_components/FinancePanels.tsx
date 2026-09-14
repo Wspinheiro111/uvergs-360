@@ -1,6 +1,7 @@
 "use client";
 
 import type { FinancialDirectory, PayableStatus, ReceivableStatus } from "@/lib/financial-data";
+import { currency } from "@/lib/format";
 
 import { approvePayableAction, createPayableAction, createReceivableAction, deletePayableAction, deleteReceivableAction, settlePayableAction, settleReceivableAction } from "../actions";
 
@@ -8,7 +9,6 @@ const RECEIVABLE_LABELS: Record<ReceivableStatus, string> = { open: "Em aberto",
 const PAYABLE_LABELS: Record<PayableStatus, string> = { draft: "Rascunho", pending_approval: "Aprovação", approved: "Aprovada", partial: "Parcial", paid: "Paga", overdue: "Vencida", cancelled: "Cancelada" };
 const STATUS_TONE: Record<string, string> = { open: "bg-blue-50 text-blue-700", draft: "bg-slate-100 text-slate-600", pending_approval: "bg-amber-50 text-amber-700", approved: "bg-blue-50 text-blue-700", overdue: "bg-red-50 text-red-700", partial: "bg-amber-50 text-amber-700", paid: "bg-emerald-50 text-emerald-700", cancelled: "bg-slate-100 text-slate-600", waived: "bg-violet-50 text-violet-700" };
 
-export function currency(cents: number) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100); }
 function date(value: Date) { return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(value); }
 
 export function ReceivablesPanel({ data }: { data: FinancialDirectory["receivables"] }) {

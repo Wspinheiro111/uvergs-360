@@ -1,9 +1,9 @@
 "use client";
 
 import type { BankEntryRow, BudgetExecutionRow, TransactionOption } from "@/lib/financial-data";
+import { currency } from "@/lib/format";
 
 import { createBudgetLineAction, createStatementEntryAction, ignoreStatementEntryAction, matchStatementEntryAction } from "../actions";
-import { currency } from "./FinancePanels";
 
 const inputClass = "form-input";
 
