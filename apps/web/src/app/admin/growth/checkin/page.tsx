@@ -11,11 +11,17 @@ const filaDemo = [
 ];
 
 const proximos = [
-  ["Luciana Freitas", "São Luiz Gonzaga"],
-  ["Ricardo Weber", "Panambi"],
-  ["Marta Silveira", "Cruz Alta"],
-  ["Paulo Nunes", "Santo Cristo"],
-  ["Cláudia Stein", "Três de Maio"],
+  ["Luciana Freitas", "São Luiz Gonzaga", "U360-IA-2026-00143"],
+  ["Ricardo Weber", "Panambi", "U360-IA-2026-00144"],
+  ["Marta Silveira", "Cruz Alta", "U360-IA-2026-00145"],
+  ["Paulo Nunes", "Santo Cristo", "U360-IA-2026-00146"],
+  ["Cláudia Stein", "Três de Maio", "U360-IA-2026-00147"],
+];
+
+const auditoriaInicial = [
+  { hora: "09:12:18", codigo: "U360-IA-2026-00142", operador: "Estação 01 • Recepção", decisao: "ACEITO", detalhe: "Presença confirmada para Ana Martins" },
+  { hora: "09:11:42", codigo: "U360-IA-2026-00141", operador: "Estação 02 • Recepção", decisao: "ACEITO", detalhe: "Presença confirmada para Carlos Ribeiro" },
+  { hora: "09:10:55", codigo: "U360-IA-2026-00140", operador: "Estação 03 • Recepção", decisao: "ACEITO", detalhe: "Presença confirmada para Marina Lopes" },
 ];
 
 export default function CheckinAoVivoPage() {
@@ -23,21 +29,32 @@ export default function CheckinAoVivoPage() {
   const [recentes, setRecentes] = useState(filaDemo);
   const [indice, setIndice] = useState(0);
   const [mensagem, setMensagem] = useState("Scanner pronto para leitura");
+  const [auditoria, setAuditoria] = useState(auditoriaInicial);
 
   const taxa = useMemo(() => ((presentes / 142) * 100).toFixed(1).replace(".", ","), [presentes]);
+
+  function agoraCompleto() {
+    return new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
 
   function simularLeitura() {
     if (indice >= proximos.length) {
       setMensagem("Demonstração concluída: todos os QR de teste foram processados.");
       return;
     }
-    const [nome, camara] = proximos[indice];
+    const [nome, camara, codigo] = proximos[indice];
     const agora = new Date();
     const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
     setPresentes((v) => Math.min(142, v + 1));
     setRecentes((lista) => [{ nome, camara, hora, status: "Credenciado" }, ...lista].slice(0, 6));
+    setAuditoria((lista) => [{ hora: agoraCompleto(), codigo, operador: "Estação 01 • Recepção", decisao: "ACEITO", detalhe: `Presença confirmada para ${nome}` }, ...lista].slice(0, 6));
     setIndice((v) => v + 1);
     setMensagem(`✓ ${nome} credenciado com sucesso`);
+  }
+
+  function testarDuplicidade() {
+    setMensagem("⚠ QR já utilizado — segunda entrada bloqueada");
+    setAuditoria((lista) => [{ hora: agoraCompleto(), codigo: "U360-IA-2026-00142", operador: "Estação 01 • Recepção", decisao: "BLOQUEADO", detalhe: "Tentativa duplicada para Ana Martins; presença original preservada" }, ...lista].slice(0, 6));
   }
 
   return (
@@ -52,7 +69,7 @@ export default function CheckinAoVivoPage() {
                 <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[10px] font-black text-emerald-800"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" /> Operação ativa</span>
               </div>
               <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-[-.045em] lg:text-6xl">Credenciamento rápido, presença confirmada na hora.</h1>
-              <p className="mt-5 max-w-3xl text-base leading-relaxed text-emerald-50 lg:text-lg">Inteligência Artificial na Gestão Pública • credenciamento demonstrativo por QR Code.</p>
+              <p className="mt-5 max-w-3xl text-base leading-relaxed text-emerald-50 lg:text-lg">Inteligência Artificial na Gestão Pública • credenciamento demonstrativo por QR Code com bloqueio visual de duplicidade.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/admin/growth/events" className="rounded-2xl bg-white px-5 py-3 text-sm font-black text-emerald-800">Ver Evento 360</Link>
@@ -76,13 +93,10 @@ export default function CheckinAoVivoPage() {
               <div className="relative mx-auto flex aspect-square max-w-[330px] items-center justify-center overflow-hidden rounded-[26px] border border-white/10 bg-gradient-to-br from-slate-900 to-slate-800">
                 <div className="absolute inset-8 rounded-[22px] border-2 border-dashed border-emerald-300/60" />
                 <div className="absolute left-10 right-10 top-1/2 h-0.5 animate-pulse bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_18px_rgba(110,231,183,.9)]" />
-                <div className="text-center">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl">▦</div>
-                  <p className="mt-4 text-sm font-black">Aponte o QR da credencial</p>
-                  <p className="mt-1 text-xs text-slate-400">câmera simulada para demonstração</p>
-                </div>
+                <div className="text-center"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl">▦</div><p className="mt-4 text-sm font-black">Aponte o QR da credencial</p><p className="mt-1 text-xs text-slate-400">câmera simulada para demonstração</p></div>
               </div>
-              <button onClick={simularLeitura} className="mt-5 w-full rounded-2xl bg-emerald-400 px-5 py-3.5 text-sm font-black text-emerald-950 transition hover:bg-emerald-300">Simular leitura de QR</button>
+              <button onClick={simularLeitura} className="mt-5 w-full rounded-2xl bg-emerald-400 px-5 py-3.5 text-sm font-black text-emerald-950 transition hover:bg-emerald-300">Simular QR válido</button>
+              <button onClick={testarDuplicidade} className="mt-2 w-full rounded-2xl border border-amber-300/30 bg-amber-300/10 px-5 py-3 text-sm font-black text-amber-200 transition hover:bg-amber-300/20">Testar QR duplicado</button>
               <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-center text-xs font-bold text-emerald-200">{mensagem}</div>
             </div>
 
@@ -107,16 +121,20 @@ export default function CheckinAoVivoPage() {
           </article>
         </section>
 
-        <section className="mt-6 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-          <article className="rounded-[32px] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 lg:p-8">
-            <p className="text-[11px] font-black uppercase tracking-[.2em] text-blue-700">Depois do check-in</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight">A presença alimenta automaticamente o relacionamento.</h2>
-            <div className="mt-6 grid gap-3 sm:grid-cols-4">{[["1","QR lido"],["2","presença confirmada"],["3","Perfil 360º atualizado"],["4","certificado liberado"]].map(([n,t])=><div key={n} className="rounded-2xl border border-blue-100 bg-white p-4"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-700 text-xs font-black text-white">{n}</span><p className="mt-3 text-sm font-black text-slate-800">{t}</p></div>)}</div>
-          </article>
-          <article className="rounded-[32px] bg-gradient-to-br from-emerald-700 to-teal-600 p-6 text-white lg:p-8"><p className="text-[11px] font-black uppercase tracking-[.2em] text-emerald-100">Operação sem papel</p><h2 className="mt-2 text-3xl font-black">Credencial digital → presença → certificado.</h2><p className="mt-4 text-sm leading-relaxed text-emerald-50">Na versão de produção, o check-in deverá registrar operador, estação, horário e identificador do evento em trilha auditável, com proteção contra leitura duplicada.</p><Link href="/portal/vereador/certificados/ia-gestao-publica" className="mt-6 inline-flex rounded-2xl bg-white px-5 py-3 text-sm font-black text-emerald-800">Ver certificado automático →</Link></article>
+        <section className="mt-6 rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+          <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[11px] font-black uppercase tracking-[.2em] text-violet-600">Trilha de auditoria</p><h2 className="mt-2 text-3xl font-black tracking-tight">Cada decisão deixa um rastro.</h2></div><span className="rounded-full bg-violet-50 px-3 py-1.5 text-[10px] font-black text-violet-700">Operador • estação • horário • resultado</span></div>
+          <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+            <div className="hidden grid-cols-[.5fr_1fr_1fr_.55fr_1.5fr] gap-3 bg-slate-50 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 lg:grid"><span>Hora</span><span>Código</span><span>Operador</span><span>Decisão</span><span>Detalhe</span></div>
+            {auditoria.map((a,i)=><div key={`${a.hora}-${i}`} className={`grid gap-2 px-5 py-4 text-xs lg:grid-cols-[.5fr_1fr_1fr_.55fr_1.5fr] lg:items-center ${i<auditoria.length-1?"border-b border-slate-100":""}`}><b className="text-slate-600">{a.hora}</b><span className="font-mono text-[11px] text-slate-500">{a.codigo}</span><span className="font-semibold text-slate-600">{a.operador}</span><span className={`w-fit rounded-full px-2.5 py-1 text-[9px] font-black ${a.decisao==="ACEITO"?"bg-emerald-50 text-emerald-700":"bg-amber-50 text-amber-700"}`}>{a.decisao}</span><span className="text-slate-500">{a.detalhe}</span></div>)}
+          </div>
         </section>
 
-        <section className="mt-6 rounded-[28px] border border-amber-100 bg-amber-50 p-5 text-xs leading-relaxed text-amber-900"><b>Demonstração:</b> este painel não grava presença real, não acessa câmera e não altera banco de dados. Os números e participantes são sintéticos.</section>
+        <section className="mt-6 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
+          <article className="rounded-[32px] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 lg:p-8"><p className="text-[11px] font-black uppercase tracking-[.2em] text-blue-700">Depois do check-in</p><h2 className="mt-2 text-3xl font-black tracking-tight">A presença alimenta automaticamente o relacionamento.</h2><div className="mt-6 grid gap-3 sm:grid-cols-4">{[["1","QR lido"],["2","presença confirmada"],["3","Perfil 360º atualizado"],["4","certificado liberado"]].map(([n,t])=><div key={n} className="rounded-2xl border border-blue-100 bg-white p-4"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-700 text-xs font-black text-white">{n}</span><p className="mt-3 text-sm font-black text-slate-800">{t}</p></div>)}</div></article>
+          <article className="rounded-[32px] bg-gradient-to-br from-emerald-700 to-teal-600 p-6 text-white lg:p-8"><p className="text-[11px] font-black uppercase tracking-[.2em] text-emerald-100">Operação auditável</p><h2 className="mt-2 text-3xl font-black">Credencial digital → presença → certificado.</h2><p className="mt-4 text-sm leading-relaxed text-emerald-50">A demonstração já mostra a lógica de bloqueio de segunda leitura e o registro de operador, estação, horário e decisão. A persistência real virá na implementação de produção.</p><Link href="/portal/vereador/certificados/ia-gestao-publica" className="mt-6 inline-flex rounded-2xl bg-white px-5 py-3 text-sm font-black text-emerald-800">Ver certificado automático →</Link></article>
+        </section>
+
+        <section className="mt-6 rounded-[28px] border border-amber-100 bg-amber-50 p-5 text-xs leading-relaxed text-amber-900"><b>Demonstração:</b> este painel não grava presença real, não acessa câmera e não altera banco de dados. O bloqueio de duplicidade e a auditoria acima são simulações de comportamento para validar a experiência antes da persistência transacional.</section>
       </div>
     </div>
   );
