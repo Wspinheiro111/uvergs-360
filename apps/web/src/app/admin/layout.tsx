@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/admin", label: "Início", icon: "🏠" },
+  { href: "/admin/growth", label: "Radar UVERGS", icon: "📡" },
   { href: "/admin/flags", label: "Feature Flags", icon: "🚩" },
   { href: "/admin/users", label: "Usuários", icon: "👥" },
   { href: "/admin/audit", label: "Auditoria", icon: "📋" },
@@ -26,7 +27,7 @@ export default function AdminLayout({
           <p className="text-xs font-bold tracking-widest text-blue-300 uppercase">
             UVERGS 360
           </p>
-          <p className="text-xs text-blue-400 mt-0.5">Gestão Institucional</p>
+          <p className="text-xs text-blue-400 mt-0.5">Relacionamento Institucional</p>
         </div>
 
         {/* Nav */}
@@ -55,7 +56,7 @@ export default function AdminLayout({
 
         {/* Footer */}
         <div className="p-4 border-t border-blue-800">
-          <p className="text-xs text-blue-400">W9 Sistemas · v0.1.0-F0</p>
+          <p className="text-xs text-blue-400">W9 Sistemas · Growth Foundation</p>
         </div>
       </aside>
 
