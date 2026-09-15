@@ -15,7 +15,7 @@ export default function CertificadoEventoPage() {
     <main className="mx-auto max-w-[1400px] px-5 py-10 lg:px-10 lg:py-14 print:max-w-none print:p-0">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div><span className="rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">✓ Presença confirmada</span><h1 className="mt-3 text-4xl font-black tracking-tight">Certificado liberado automaticamente.</h1><p className="mt-2 text-sm text-slate-500">Exemplo demonstrativo do pós-evento conectado ao check-in.</p></div>
-        <button onClick={()=>window.print()} className="rounded-2xl bg-blue-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-100">Imprimir / salvar em PDF</button>
+        <div className="flex flex-wrap gap-3"><Link href="/certificados/verificar/CERT-U360-2026-00142" className="rounded-2xl border border-blue-200 bg-white px-5 py-3 text-sm font-black text-blue-700">Verificar autenticidade</Link><button onClick={()=>window.print()} className="rounded-2xl bg-blue-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-100">Imprimir / salvar em PDF</button></div>
       </div>
 
       <section className="relative overflow-hidden rounded-[34px] border-[10px] border-white bg-white shadow-2xl shadow-blue-200/60 print:rounded-none print:border-0 print:shadow-none">
@@ -45,14 +45,15 @@ export default function CertificadoEventoPage() {
             <div className="text-center"><div className="mx-auto h-px w-64 bg-slate-300"/><p className="mt-3 text-sm font-black text-slate-800">24 de setembro de 2026</p><p className="mt-1 text-[10px] text-slate-400">Porto Alegre • Rio Grande do Sul</p></div>
           </div>
 
-          <div className="mt-14 border-t border-slate-100 pt-5 text-center text-[10px] leading-relaxed text-slate-400">Documento demonstrativo do UVERGS 360. Em produção, o certificado deverá possuir identificador verificável, assinatura institucional e trilha de emissão vinculada à presença validada.</div>
+          <div className="mt-14 border-t border-slate-100 pt-5 text-center text-[10px] leading-relaxed text-slate-400">Documento demonstrativo do UVERGS 360. Código público de consulta: CERT-U360-2026-00142. Em produção, a verificação deverá refletir o estado real de emissão/revogação e a integridade do documento.</div>
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-3 print:hidden">
+      <section className="mt-6 grid gap-4 md:grid-cols-4 print:hidden">
         <div className="rounded-[24px] border border-slate-200 bg-white p-5"><p className="text-[10px] font-black uppercase tracking-widest text-blue-500">1. Check-in</p><p className="mt-2 text-sm font-black">Presença confirmada</p></div>
         <div className="rounded-[24px] border border-slate-200 bg-white p-5"><p className="text-[10px] font-black uppercase tracking-widest text-blue-500">2. Regra</p><p className="mt-2 text-sm font-black">Elegibilidade validada</p></div>
         <div className="rounded-[24px] border border-slate-200 bg-white p-5"><p className="text-[10px] font-black uppercase tracking-widest text-blue-500">3. Entrega</p><p className="mt-2 text-sm font-black">Certificado no Meu UVERGS</p></div>
+        <Link href="/certificados/verificar/CERT-U360-2026-00142" className="rounded-[24px] border border-emerald-100 bg-emerald-50 p-5"><p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">4. Validação</p><p className="mt-2 text-sm font-black text-emerald-950">Consulta pública →</p></Link>
       </section>
     </main>
   </div>;
