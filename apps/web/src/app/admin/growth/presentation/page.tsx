@@ -1,0 +1,33 @@
+import Link from "next/link";
+
+const pillars = [
+  ["01","Encontrar","Mapear vereadores, Câmaras e lacunas de relacionamento."],
+  ["02","Entender","Ler interesse, engajamento, histórico e oportunidade."],
+  ["03","Comunicar","Usar campanhas segmentadas e o canal certo para cada perfil."],
+  ["04","Converter","Transformar interesse em inscrição, presença e recorrência."],
+];
+
+export default function PresentationModePage(){
+  return <div className="min-h-screen bg-[#f4f8ff] text-slate-950">
+    <section className="relative min-h-[88vh] overflow-hidden flex items-center">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(56,189,248,.24),transparent_28%),radial-gradient(circle_at_85%_25%,rgba(16,185,129,.18),transparent_25%),linear-gradient(135deg,#f8fbff_0%,#edf6ff_50%,#f2fff9_100%)]" />
+      <div className="absolute -right-24 top-24 w-[520px] h-[520px] rounded-full border-[70px] border-blue-200/35" />
+      <div className="absolute right-24 top-56 w-[280px] h-[280px] rounded-full border-[38px] border-emerald-200/50" />
+      <div className="relative max-w-[1500px] mx-auto px-8 lg:px-14 py-20 grid lg:grid-cols-[1.1fr_.9fr] gap-12 items-center">
+        <div><div className="inline-flex items-center gap-2 rounded-full bg-white border border-blue-100 shadow-sm px-4 py-2 text-xs font-bold tracking-widest uppercase text-blue-700">UVERGS 360 · Visão de futuro</div><h1 className="mt-6 text-5xl lg:text-7xl font-black tracking-[-.045em] leading-[.95] max-w-5xl">Uma UVERGS mais próxima de cada vereador do Rio Grande do Sul.</h1><p className="mt-6 text-xl text-slate-600 max-w-3xl leading-relaxed">Uma plataforma para conectar dados, relacionamento, comunicação e eventos em uma única visão executiva.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/admin/growth" className="rounded-2xl bg-blue-700 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-blue-200">Abrir Radar</Link><Link href="/admin/growth/territory" className="rounded-2xl bg-white border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-800">Ver território</Link><Link href="/admin/growth/campaigns" className="rounded-2xl bg-white border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-800">Ver campanhas</Link></div></div>
+        <div className="grid grid-cols-2 gap-4 rotate-[-2deg]">{[["5.000","vereadores na visão de relacionamento"],["497","municípios no mapa territorial"],["360º","perfil e histórico de cada contato"],["1","central para dirigir crescimento"]].map(([v,l],i)=><div key={l} className={`rounded-[32px] p-6 border shadow-xl ${i===0?"bg-blue-700 text-white border-blue-600":i===3?"bg-emerald-500 text-white border-emerald-400":"bg-white border-white"}`}><p className="text-4xl lg:text-5xl font-black">{v}</p><p className={`mt-3 text-sm leading-relaxed ${i===0||i===3?"text-white/80":"text-slate-500"}`}>{l}</p></div>)}</div>
+      </div>
+    </section>
+
+    <section className="max-w-[1500px] mx-auto px-8 lg:px-14 py-16">
+      <div className="grid lg:grid-cols-4 gap-4">{pillars.map(([n,title,text])=><article key={n} className="rounded-[30px] bg-white border border-slate-200 p-6 shadow-sm hover:-translate-y-1 transition-transform"><span className="text-xs font-black tracking-widest text-blue-500">{n}</span><h2 className="mt-5 text-2xl font-bold">{title}</h2><p className="mt-3 text-sm text-slate-500 leading-relaxed">{text}</p></article>)}</div>
+    </section>
+
+    <section className="max-w-[1500px] mx-auto px-8 lg:px-14 py-8 grid lg:grid-cols-[1.25fr_.75fr] gap-5">
+      <article className="rounded-[36px] bg-[#0b2554] text-white p-8 lg:p-10 overflow-hidden relative"><div className="absolute right-0 bottom-0 w-72 h-72 rounded-full bg-cyan-400/10 blur-3xl"/><p className="text-xs font-bold tracking-widest uppercase text-cyan-300">A mudança de lógica</p><h2 className="mt-3 text-4xl font-black tracking-tight max-w-4xl">Sair da lista de contatos e chegar à inteligência de relacionamento.</h2><div className="mt-8 grid sm:grid-cols-2 gap-3">{[["Antes","Quem podemos convidar?"],["Depois","Quem tem maior chance de participar?"],["Antes","Mandar para todos"],["Depois","Falar com o público certo, do jeito certo"]].map(([a,b])=><div key={a+b} className="rounded-2xl bg-white/10 border border-white/10 p-5"><p className="text-[11px] uppercase tracking-widest text-blue-200">{a}</p><p className="mt-2 font-semibold">{b}</p></div>)}</div></article>
+      <article className="rounded-[36px] bg-gradient-to-br from-emerald-100 via-white to-cyan-100 border border-emerald-100 p-8"><p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Resultado esperado</p><div className="mt-6 space-y-5">{[["Mais alcance","mais vereadores conhecidos e alcançáveis"],["Mais participação","mais inscrições e presença nos eventos"],["Mais recorrência","mais relacionamento ao longo do mandato"],["Mais inteligência","decisões baseadas em dados e comportamento"]].map(([t,d])=><div key={t} className="flex gap-4"><div className="w-10 h-10 shrink-0 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold">✓</div><div><p className="font-bold text-slate-900">{t}</p><p className="text-sm text-slate-500 mt-1">{d}</p></div></div>)}</div></article>
+    </section>
+
+    <section className="max-w-[1500px] mx-auto px-8 lg:px-14 py-16"><div className="rounded-[40px] bg-white border border-slate-200 p-8 lg:p-12 shadow-sm text-center"><p className="text-xs font-bold uppercase tracking-[.25em] text-blue-700">UVERGS 360</p><h2 className="mt-4 text-4xl lg:text-6xl font-black tracking-tight">Conectar. Conhecer. Atrair. Converter. Manter.</h2><p className="mt-5 text-lg text-slate-500 max-w-3xl mx-auto">A tecnologia como ponte entre a UVERGS, as Câmaras Municipais e cada vereador do Rio Grande do Sul.</p><div className="mt-8 flex justify-center"><Link href="/admin/growth" className="rounded-2xl bg-slate-950 text-white px-6 py-3.5 font-semibold">Entrar na experiência</Link></div></div></section>
+  </div>;
+}
