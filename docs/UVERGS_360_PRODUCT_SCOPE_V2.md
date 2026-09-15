@@ -162,34 +162,33 @@ Intelligence é derivada; não é fonte primária de PII.
 
 Módulo administrativo da própria associação. **Não é financeiro de Câmara Municipal.**
 
-Inclui:
-
 #### Contas a pagar
 
 - fornecedores;
-- categorias/centros de custo;
+- categorias e centros de custo;
 - competência;
 - vencimento;
 - pagamento;
 - parcelamento;
 - recorrência;
-- anexos/comprovantes;
+- anexos e comprovantes;
 - rateio por evento/centro de custo;
 - status: previsto, aberto, vencido, agendado, pago, cancelado;
 - fluxo de aprovação conforme perfil;
+- baixa manual;
 - histórico e auditoria.
 
 #### Contas a receber
 
 - origem do recebível;
 - cliente/pagador;
-- vínculo opcional com evento/inscrição/associação/serviço;
+- vínculo opcional com evento, inscrição, associação ou serviço;
 - competência;
 - vencimento;
-- recebimento parcial/total;
-- descontos/juros quando aplicável;
+- recebimento parcial ou total;
+- descontos e juros quando aplicável;
 - status: previsto, aberto, vencido, recebido, cancelado;
-- baixa manual e por conciliação;
+- baixa manual;
 - anexos;
 - histórico e auditoria.
 
@@ -199,31 +198,19 @@ Inclui:
 - despesas por categoria;
 - centros de custo;
 - eventos como dimensão analítica;
-- comparação mensal/anual;
+- comparação mensal e anual;
 - resultado operacional;
 - margens e evolução;
 - regime gerencial configurável conforme decisão contábil da UVERGS.
 
 O DRE do sistema é gerencial e não substitui a contabilidade oficial.
 
-#### Conciliação bancária
-
-- integração bancária desacoplada por adapter;
-- Banrisul como primeiro banco;
-- importação/sincronização de transações autorizadas;
-- identificação de créditos/débitos;
-- sugestão de correspondência com contas a pagar/receber;
-- conciliação automática quando houver correspondência segura;
-- revisão manual para casos ambíguos;
-- transações ignoradas/justificadas;
-- trilha de auditoria;
-- prevenção de duplicidade por identificador/hash/idempotência;
-- suporte a importação OFX/CSV como contingência, se aprovado.
-
-A integração Banrisul deverá respeitar os requisitos oficiais vigentes, credenciais OAuth2, consentimentos e/ou habilitação como parceiro conforme a API utilizada.
-
 #### Fora do financeiro
 
+- conciliação bancária;
+- integração bancária automática;
+- API Banrisul ou de outros bancos;
+- importação automática de extratos;
 - emissão de NF-e;
 - emissão de NFS-e;
 - SPED;
@@ -239,7 +226,7 @@ Módulo enxuto para materiais e produtos utilizados pela UVERGS, especialmente e
 
 Inclui:
 
-- produtos/materiais;
+- produtos e materiais;
 - SKU/código interno;
 - unidade de medida;
 - estoque atual;
@@ -273,7 +260,7 @@ Inclui:
 - configurações;
 - segurança;
 - privacidade/LGPD;
-- integrações;
+- integrações necessárias aos canais previstos do produto;
 - importações controladas;
 - logs técnicos sem PII indevida.
 
@@ -319,6 +306,14 @@ O UVERGS 360 não terá, salvo nova decisão formal:
 - SAT/MDF-e/CT-e;
 - SPED;
 - escrituração fiscal.
+
+### Bancário
+
+- conciliação bancária;
+- integração automática com Banrisul;
+- integração automática com outros bancos;
+- Open Finance;
+- leitura automática de extratos bancários.
 
 ### Política/eleitoral
 
@@ -376,7 +371,6 @@ O UVERGS 360 não terá, salvo nova decisão formal:
 - Contas a Pagar
 - Contas a Receber
 - DRE
-- Conciliação Bancária
 
 ### Almoxarifado
 - Visão de Estoque
@@ -396,7 +390,7 @@ O UVERGS 360 não terá, salvo nova decisão formal:
 - Usuários e Permissões
 - Auditoria
 - Configurações
-- Integrações
+- Integrações necessárias aos canais do produto
 
 ---
 
@@ -406,11 +400,10 @@ O UVERGS 360 não terá, salvo nova decisão formal:
 2. Consolidar Segmentação e Radar.
 3. Fechar ciclo de Eventos ponta a ponta.
 4. Consolidar Meu UVERGS e Portal da Câmara.
-5. Implementar Financeiro da associação.
-6. Implementar conciliação Banrisul via adapter e ambiente autorizado.
-7. Implementar Almoxarifado enxuto vinculado a eventos.
-8. Consolidar Inteligência/relatórios e linha de base.
-9. Endurecer segurança, testes, observabilidade, importação e operação.
+5. Implementar Financeiro da associação: contas a pagar, contas a receber e DRE.
+6. Implementar Almoxarifado enxuto vinculado a eventos.
+7. Consolidar Inteligência/relatórios e linha de base.
+8. Endurecer segurança, testes, observabilidade, importação e operação.
 
 ---
 
