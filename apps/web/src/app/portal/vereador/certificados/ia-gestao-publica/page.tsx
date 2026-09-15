@@ -14,8 +14,8 @@ export default function CertificadoEventoPage() {
 
     <main className="mx-auto max-w-[1400px] px-5 py-10 lg:px-10 lg:py-14 print:max-w-none print:p-0">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 print:hidden">
-        <div><span className="rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">✓ Presença confirmada</span><h1 className="mt-3 text-4xl font-black tracking-tight">Certificado liberado automaticamente.</h1><p className="mt-2 text-sm text-slate-500">Exemplo demonstrativo do pós-evento conectado ao check-in.</p></div>
-        <div className="flex flex-wrap gap-3"><Link href="/certificados/verificar/CERT-U360-2026-00142" className="rounded-2xl border border-blue-200 bg-white px-5 py-3 text-sm font-black text-blue-700">Verificar autenticidade</Link><button onClick={()=>window.print()} className="rounded-2xl bg-blue-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-100">Imprimir / salvar em PDF</button></div>
+        <div><span className="rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">✓ Presença confirmada</span><h1 className="mt-3 text-4xl font-black tracking-tight">Certificado liberado automaticamente.</h1><p className="mt-2 text-sm text-slate-500">O certificado encerra a operação do evento — e a avaliação inicia o próximo relacionamento.</p></div>
+        <div className="flex flex-wrap gap-3"><Link href="/portal/vereador/avaliacao/ia-gestao-publica" className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-emerald-100">Avaliar evento</Link><Link href="/certificados/verificar/CERT-U360-2026-00142" className="rounded-2xl border border-blue-200 bg-white px-5 py-3 text-sm font-black text-blue-700">Verificar autenticidade</Link><button onClick={()=>window.print()} className="rounded-2xl bg-blue-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-100">Imprimir / salvar em PDF</button></div>
       </div>
 
       <section className="relative overflow-hidden rounded-[34px] border-[10px] border-white bg-white shadow-2xl shadow-blue-200/60 print:rounded-none print:border-0 print:shadow-none">
@@ -49,11 +49,12 @@ export default function CertificadoEventoPage() {
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-4 print:hidden">
+      <section className="mt-6 grid gap-4 md:grid-cols-5 print:hidden">
         <div className="rounded-[24px] border border-slate-200 bg-white p-5"><p className="text-[10px] font-black uppercase tracking-widest text-blue-500">1. Check-in</p><p className="mt-2 text-sm font-black">Presença confirmada</p></div>
         <div className="rounded-[24px] border border-slate-200 bg-white p-5"><p className="text-[10px] font-black uppercase tracking-widest text-blue-500">2. Regra</p><p className="mt-2 text-sm font-black">Elegibilidade validada</p></div>
         <div className="rounded-[24px] border border-slate-200 bg-white p-5"><p className="text-[10px] font-black uppercase tracking-widest text-blue-500">3. Entrega</p><p className="mt-2 text-sm font-black">Certificado no Meu UVERGS</p></div>
         <Link href="/certificados/verificar/CERT-U360-2026-00142" className="rounded-[24px] border border-emerald-100 bg-emerald-50 p-5"><p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">4. Validação</p><p className="mt-2 text-sm font-black text-emerald-950">Consulta pública →</p></Link>
+        <Link href="/portal/vereador/avaliacao/ia-gestao-publica" className="rounded-[24px] border border-violet-100 bg-violet-50 p-5"><p className="text-[10px] font-black uppercase tracking-widest text-violet-600">5. Relacionamento</p><p className="mt-2 text-sm font-black text-violet-950">Avaliar e continuar →</p></Link>
       </section>
     </main>
   </div>;
