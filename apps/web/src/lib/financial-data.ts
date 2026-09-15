@@ -45,8 +45,6 @@ export interface MonthlyResultRow {
 }
 
 export interface BudgetExecutionRow { year: number; month: number; accountName: string; costCenterName: string; plannedCents: number; actualCents: number; }
-export interface BankEntryRow { id: string; postedAt: Date; amountCents: number; description: string; status: "unmatched" | "matched" | "ignored"; transactionId: string | null; }
-export interface TransactionOption { id: string; occurredAt: Date; amountCents: number; memo: string | null; type: string; }
 export interface TrialBalanceRow { code: string; name: string; nature: string; debitCents: number; creditCents: number; balanceCents: number; }
 
 export interface FinancialDirectory {
@@ -55,8 +53,6 @@ export interface FinancialDirectory {
   cashPositions: CashPositionRow[];
   monthlyResults: MonthlyResultRow[];
   budgetExecution: BudgetExecutionRow[];
-  bankEntries: BankEntryRow[];
-  transactionOptions: TransactionOption[];
   trialBalance: TrialBalanceRow[];
   totals: {
     cashBalanceCents: number;
@@ -68,7 +64,6 @@ export interface FinancialDirectory {
     commitmentsCents: number;
     budgetPlannedCents: number;
     budgetActualCents: number;
-    unreconciled: number;
     restrictedProjects: number;
   };
 }
@@ -80,7 +75,7 @@ export async function loadFinancialDirectory(
 ): Promise<AdminDataResult<FinancialDirectory>> {
   return withAdminRead(FINANCE_ROLES, async (sql) => {
     const pattern = `%${search}%`;
-    const [receivables, payables, cashPositions, monthlyResults, totalsRows, budgetExecution, bankEntries, transactionOptions, trialBalance] = await Promise.all([
+    const [receivables, payables, cashPositions, monthlyResults, totalsRows, budgetExecution, trialBalance] = await Promise.all([
       sql<ReceivableRow[]>`
         SELECT r.id, r.description, r.competence, r.kind, r.status,
           r.due_date AS "dueDate", r.amount_cents AS "amountCents",
@@ -131,26 +126,21 @@ export async function loadFinancialDirectory(
           COALESCE((SELECT SUM(amount_cents) FROM commitments WHERE status IN ('planned','approved')), 0)::int AS "commitmentsCents",
           COALESCE((SELECT SUM(planned_cents) FROM financial_budget_vs_actual), 0)::int AS "budgetPlannedCents",
           COALESCE((SELECT SUM(actual_cents) FROM financial_budget_vs_actual), 0)::int AS "budgetActualCents",
-          (SELECT COUNT(*)::int FROM bank_statement_entries WHERE status='unmatched') AS unreconciled,
           (SELECT COUNT(*)::int FROM funding_projects WHERE restricted_funds AND status='active') AS "restrictedProjects"
       `,
       sql<BudgetExecutionRow[]>`SELECT b.year,b.month,aa.name AS "accountName",cc.name AS "costCenterName",
         b.planned_cents::int AS "plannedCents",b.actual_cents::int AS "actualCents"
         FROM financial_budget_vs_actual b JOIN accounting_accounts aa ON aa.tenant_id=b.tenant_id AND aa.id=b.accounting_account_id
         JOIN cost_centers cc ON cc.tenant_id=b.tenant_id AND cc.id=b.cost_center_id ORDER BY b.year DESC,b.month DESC,aa.code`,
-      sql<BankEntryRow[]>`SELECT id,posted_at AS "postedAt",amount_cents AS "amountCents",description,status,transaction_id AS "transactionId"
-        FROM bank_statement_entries ORDER BY posted_at DESC,imported_at DESC LIMIT 100`,
-      sql<TransactionOption[]>`SELECT id,occurred_at AS "occurredAt",amount_cents AS "amountCents",memo,type
-        FROM financial_transactions WHERE status='confirmed' ORDER BY occurred_at DESC LIMIT 100`,
       sql<TrialBalanceRow[]>`SELECT code,name,nature,debit_cents::int AS "debitCents",credit_cents::int AS "creditCents",balance_cents::int AS "balanceCents"
         FROM financial_trial_balance ORDER BY code`,
     ]);
     return {
-      receivables, payables, cashPositions, monthlyResults, budgetExecution, bankEntries, transactionOptions, trialBalance,
+      receivables, payables, cashPositions, monthlyResults, budgetExecution, trialBalance,
       totals: totalsRows[0] ?? {
         cashBalanceCents: 0, expectedCents: 0, receivedCents: 0, receivablesOverdueCents: 0,
         payablesOpenCents: 0, payablesOverdueCents: 0, commitmentsCents: 0,
-        budgetPlannedCents: 0, budgetActualCents: 0, unreconciled: 0, restrictedProjects: 0,
+        budgetPlannedCents: 0, budgetActualCents: 0, restrictedProjects: 0,
       },
     };
   });

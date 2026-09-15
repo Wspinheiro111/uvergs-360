@@ -20,7 +20,7 @@ const baseSchema = z.object({
   amountCents: z.number().int().positive().max(2_000_000_000),
 });
 
-type FinancialView = "receber" | "pagar" | "orcamento" | "conciliacao";
+type FinancialView = "receber" | "pagar" | "orcamento";
 
 function finish(view: FinancialView, message: string, error = false): never {
   revalidatePath("/admin/financeiro");
@@ -215,52 +215,10 @@ export async function createBudgetLineAction(formData: FormData) {
   finish("orcamento", result.error ?? "Orçamento atualizado.", Boolean(result.error));
 }
 
-export async function createStatementEntryAction(formData: FormData) {
-  const parsed = z.object({ postedAt: z.string().refine(isValidIsoDate), direction: z.enum(["inflow","outflow"]),
-    description: z.string().trim().min(3).max(240), amountCents: z.number().int().positive() }).safeParse({
-    postedAt: formData.get("postedAt"), direction: formData.get("direction"), description: formData.get("description"),
-    amountCents: parseBrlCents(String(formData.get("amount") ?? "")),
-  });
-  if (!parsed.success) finish("conciliacao", "Revise os dados do extrato.", true);
-  const result = await withAdminWrite(WRITE_ROLES, async (sql, context) => {
-    await sql`INSERT INTO financial_accounts (tenant_id,name,type,opening_balance_cents)
-      SELECT ${context.tenantId},'Conta principal','checking',0 WHERE NOT EXISTS
-      (SELECT 1 FROM financial_accounts WHERE tenant_id=${context.tenantId} AND active)`;
-    const [entry] = await sql<{ id: string }[]>`INSERT INTO bank_statement_entries
-      (tenant_id,financial_account_id,external_id,posted_at,amount_cents,description,status)
-      SELECT ${context.tenantId},id,${`manual-statement-${randomUUID()}`},${parsed.data.postedAt},
-        ${parsed.data.direction === "inflow" ? parsed.data.amountCents : -parsed.data.amountCents},${parsed.data.description},'unmatched'
-      FROM financial_accounts WHERE tenant_id=${context.tenantId} AND active ORDER BY created_at LIMIT 1 RETURNING id`;
-    await auditAction(sql, context, "create", "bank_statement_entry", entry.id);
-  });
-  finish("conciliacao", result.error ?? "Lançamento bancário importado.", Boolean(result.error));
-}
-
-export async function matchStatementEntryAction(formData: FormData) {
-  const entryId = String(formData.get("entryId") ?? "");
-  const transactionId = String(formData.get("transactionId") ?? "");
-  if (![entryId,transactionId].every(id=>z.string().uuid().safeParse(id).success)) finish("conciliacao", "Seleção inválida.", true);
-  const result = await withAdminWrite(WRITE_ROLES, async (sql, context) => {
-    const rows = await sql<{ id: string }[]>`UPDATE bank_statement_entries b SET status='matched',transaction_id=t.id
-      FROM financial_transactions t WHERE b.tenant_id=${context.tenantId} AND b.id=${entryId} AND b.status='unmatched'
-        AND t.tenant_id=b.tenant_id AND t.id=${transactionId} AND t.status='confirmed'
-        AND ABS(b.amount_cents)=t.amount_cents AND b.financial_account_id=t.financial_account_id RETURNING b.id`;
-    if (!rows.length) throw new Error("RECONCILIATION_MISMATCH");
-    await auditAction(sql, context, "match", "bank_statement_entry", entryId);
-  });
-  finish("conciliacao", result.error ?? "Movimentação conciliada.", Boolean(result.error));
-}
-
-export async function ignoreStatementEntryAction(formData: FormData) {
-  const entryId = String(formData.get("entryId") ?? "");
-  if (!z.string().uuid().safeParse(entryId).success) finish("conciliacao", "Identificador inválido.", true);
-  const result = await withAdminWrite(WRITE_ROLES, async (sql, context) => {
-    const rows = await sql`UPDATE bank_statement_entries SET status='ignored' WHERE tenant_id=${context.tenantId} AND id=${entryId} AND status='unmatched' RETURNING id`;
-    if (!rows.length) throw new Error("ENTRY_NOT_FOUND");
-    await auditAction(sql, context, "ignore", "bank_statement_entry", entryId);
-  });
-  finish("conciliacao", result.error ?? "Pendência ignorada.", Boolean(result.error));
-}
+// Conciliação bancária removida da experiência do produto (escopo v2).
+// Antes havia aqui: createStatementEntryAction, matchStatementEntryAction,
+// ignoreStatementEntryAction — todas operavam sobre bank_statement_entries,
+// que permanece dormente no banco (ver docs/UVERGS_360_PRODUCT_SCOPE_V2.md).
 
 interface TransactionInput {
   type: "inflow" | "outflow";

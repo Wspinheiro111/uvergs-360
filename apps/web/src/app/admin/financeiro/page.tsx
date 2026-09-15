@@ -5,11 +5,16 @@ import { currency } from "@/lib/format";
 
 import { DataNotice } from "../_components/DataNotice";
 import { OverviewPanels, PayablesPanel, ReceivablesPanel, ReportsPanel } from "./_components/FinancePanels";
-import { BudgetPanel, ReconciliationPanel } from "./_components/FinanceOperations";
+import { BudgetPanel } from "./_components/FinanceOperations";
 
+// Conciliação bancária removida da experiência do produto (escopo v2:
+// UVERGS 360 não terá conciliação bancária nem integração automática com
+// bancos). A tabela bank_statement_entries e as actions correspondentes
+// permanecem dormentes no banco/código — ver docs/UVERGS_360_PRODUCT_SCOPE_V2.md
+// e o commit desta branch para o inventário do que ficou dormente.
 const VIEWS = [
   ["overview", "Visão geral"], ["receber", "Contas a receber"], ["pagar", "Contas a pagar"],
-  ["orcamento", "Orçamento"], ["conciliacao", "Conciliação"], ["relatorios", "DRE e relatórios"],
+  ["orcamento", "Orçamento"], ["relatorios", "DRE e relatórios"],
 ] as const;
 type FinancialView = typeof VIEWS[number][0];
 const RECEIVABLE_STATUSES = new Set<ReceivableStatus>(["open", "overdue", "partial", "paid", "cancelled", "waived"]);
@@ -30,7 +35,7 @@ export default async function FinancialPage({ searchParams }: FinancialPageProps
   return <div className="page-canvas">
     <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#063b72] via-[#087c91] to-[#15a274] px-6 py-8 text-white shadow-[0_24px_70px_-36px_rgba(4,90,104,.8)] sm:px-9">
       <div className="absolute -right-10 -top-16 h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" />
-      <div className="relative grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end"><div className="max-w-3xl"><span className="eyebrow-light">Gestão financeira integrada</span><h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Do lançamento à prestação de contas.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50 sm:text-base">Receber, pagar, conciliar, orçar e prestar contas em um único fluxo, conectado às Câmaras, eventos, projetos e documentos.</p></div>{directory && <div className="rounded-2xl border border-white/15 bg-white/10 px-5 py-4 backdrop-blur"><p className="text-[10px] uppercase tracking-wider text-emerald-100">Saldo disponível</p><p className="mt-1 text-2xl font-bold">{currency(directory.totals.cashBalanceCents)}</p></div>}</div>
+      <div className="relative grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end"><div className="max-w-3xl"><span className="eyebrow-light">Gestão financeira integrada</span><h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Do lançamento à prestação de contas.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50 sm:text-base">Receber, pagar, orçar e prestar contas em um único fluxo, conectado às Câmaras, eventos, projetos e documentos.</p></div>{directory && <div className="rounded-2xl border border-white/15 bg-white/10 px-5 py-4 backdrop-blur"><p className="text-[10px] uppercase tracking-wider text-emerald-100">Saldo disponível</p><p className="mt-1 text-2xl font-bold">{currency(directory.totals.cashBalanceCents)}</p></div>}</div>
     </section>
 
     <nav className="mt-6 flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2" aria-label="Áreas financeiras">{VIEWS.map(([key, label]) => <Link key={key} href={`/admin/financeiro?view=${key}`} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${view === key ? "bg-[#0b4b7e] text-white shadow-md" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"}`}>{label}</Link>)}</nav>
@@ -44,7 +49,6 @@ export default async function FinancialPage({ searchParams }: FinancialPageProps
       {view === "receber" && <ReceivablesPanel data={directory.receivables} />}
       {view === "pagar" && <PayablesPanel data={directory.payables} />}
       {view === "orcamento" && <BudgetPanel data={directory.budgetExecution} />}
-      {view === "conciliacao" && <ReconciliationPanel entries={directory.bankEntries} transactions={directory.transactionOptions} />}
       {view === "relatorios" && <ReportsPanel directory={directory} />}
     </div>}
   </div>;

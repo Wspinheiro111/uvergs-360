@@ -1,7 +1,7 @@
 import { withAdminRead } from "@/lib/admin-data";
 
 const FINANCE_ROLES = ["admin_global", "presidency", "financial", "audit_read"];
-const REPORTS = ["dre", "balancete", "orcamento", "receber", "pagar", "conciliacao"] as const;
+const REPORTS = ["dre", "balancete", "orcamento", "receber", "pagar"] as const;
 type Report = typeof REPORTS[number];
 type Cell = string | number | Date | null;
 
@@ -52,9 +52,11 @@ export async function GET(request: Request) {
       FROM payables p JOIN counterparties cp ON cp.tenant_id=p.tenant_id AND cp.id=p.counterparty_id
       LEFT JOIN financial_transactions ft ON ft.tenant_id=p.tenant_id AND ft.payable_id=p.id
       GROUP BY p.id,cp.name ORDER BY p.due_date`;
-    return sql<Record<string, Cell>[]>`
-      SELECT posted_at data,description descricao,amount_cents valor_centavos,status,transaction_id movimentacao
-      FROM bank_statement_entries ORDER BY posted_at DESC`;
+    // Todos os 5 relatórios de REPORTS são cobertos acima. Este ponto é
+    // inalcançável em tempo de execução (isReport() já validou o valor),
+    // mas o TypeScript exige um retorno para toda ramificação.
+    const exhaustiveCheck: never = report;
+    throw new Error(`Relatório não implementado: ${exhaustiveCheck}`);
   });
 
   if (!result.data) return Response.json({ error: result.error }, { status: result.error.includes("permissão") ? 403 : 500 });
