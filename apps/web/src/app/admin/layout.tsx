@@ -9,7 +9,9 @@ const navItems = [
   { href: "/admin/growth/territory", label: "Território RS", icon: "🗺️" },
   { href: "/admin/growth/campaigns", label: "Campanhas", icon: "🎯" },
   { href: "/admin/growth/profile", label: "Perfil 360º", icon: "✨" },
-  { href: "/admin/growth/presentation", label: "Modo Apresentação", icon: "▶" },
+  { href: "/portal/vereador", label: "Meu UVERGS", icon: "🪪", badge: "PORTAL" },
+  { href: "/portal/camara", label: "Portal da Câmara", icon: "🏛️", badge: "PORTAL" },
+  { href: "/admin/growth/presentation", label: "Modo Apresentação", icon: "▶", badge: "DEMO" },
   { href: "/admin/flags", label: "Feature Flags", icon: "🚩" },
   { href: "/admin/users", label: "Usuários", icon: "👥" },
   { href: "/admin/audit", label: "Auditoria", icon: "📋" },
@@ -35,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link key={item.href} href={item.href} className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${active ? "bg-white text-blue-900 shadow-lg" : "text-blue-100 hover:bg-white/10 hover:text-white"}`}>
                 <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm ${active ? "bg-blue-50" : "bg-white/5 group-hover:bg-white/10"}`}>{item.icon}</span>
                 <span className="flex-1">{item.label}</span>
-                {item.label === "Modo Apresentação" && <span className="text-[9px] font-bold rounded-full bg-emerald-400 text-emerald-950 px-2 py-0.5">DEMO</span>}
+                {item.badge && <span className={`text-[8px] font-black rounded-full px-2 py-0.5 ${item.badge === "DEMO" ? "bg-emerald-400 text-emerald-950" : "bg-cyan-300 text-cyan-950"}`}>{item.badge}</span>}
               </Link>
             );
           })}
@@ -44,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-4 border-t border-white/10">
           <div className="rounded-2xl bg-white/10 border border-white/10 p-3">
             <p className="text-[10px] uppercase tracking-widest text-blue-200">Apresentação diretoria</p>
-            <p className="text-xs text-white font-semibold mt-1">Demo executiva preparada</p>
+            <p className="text-xs text-white font-semibold mt-1">Radar + portais conectados</p>
           </div>
           <p className="text-[10px] text-blue-300 mt-3">W9 Sistemas · UVERGS 360</p>
         </div>
