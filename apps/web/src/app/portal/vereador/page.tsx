@@ -7,10 +7,10 @@ const eventos = [
 ];
 
 const historico = [
+  ["24 set", "Avaliação pós-evento disponível — IA na Gestão Pública", "Próxima ação"],
   ["12 set", "Você demonstrou interesse em IA e Gestão Pública", "Interesse"],
   ["03 ago", "Certificado emitido — Encontro Regional das Missões", "Certificado"],
   ["02 ago", "Presença confirmada no Encontro Regional das Missões", "Evento"],
-  ["15 jul", "Perfil institucional atualizado", "Perfil"],
 ];
 
 export default function MeuUvergsPage() {
@@ -35,6 +35,13 @@ export default function MeuUvergsPage() {
           </div>
         </section>
 
+        <section className="mt-6 overflow-hidden rounded-[30px] border border-violet-100 bg-gradient-to-r from-violet-50 via-white to-cyan-50 shadow-sm">
+          <div className="grid gap-5 p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
+            <div className="flex gap-4"><div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-violet-600 text-2xl text-white shadow-lg shadow-violet-100">★</div><div><div className="flex flex-wrap items-center gap-2"><p className="text-[11px] font-black uppercase tracking-[.2em] text-violet-600">Uma ação pendente</p><span className="rounded-full bg-amber-100 px-2.5 py-1 text-[9px] font-black uppercase text-amber-700">2 minutos</span></div><h2 className="mt-2 text-2xl font-black tracking-tight">Conte como foi o evento e ajude a UVERGS a acertar o próximo convite.</h2><p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500">Sua avaliação de IA na Gestão Pública pode atualizar temas de interesse e tornar as próximas recomendações mais relevantes.</p></div></div>
+            <Link href="/portal/vereador/avaliacao/ia-gestao-publica" className="rounded-2xl bg-violet-700 px-6 py-3.5 text-center text-sm font-black text-white shadow-lg shadow-violet-100">Avaliar evento agora →</Link>
+          </div>
+        </section>
+
         <section className="mt-6 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
           <article className="rounded-[30px] border border-blue-100 bg-white p-6 shadow-sm lg:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[11px] font-black uppercase tracking-[.2em] text-blue-600">Próxima melhor oportunidade</p><h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 lg:text-3xl">Inteligência Artificial na Gestão Pública</h2><p className="mt-2 text-sm text-slate-500">24 de setembro • Porto Alegre • 96% de afinidade com seus interesses</p></div><span className="rounded-full bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700">✓ Inscrição confirmada</span></div>
@@ -51,7 +58,7 @@ export default function MeuUvergsPage() {
         </section>
 
         <section className="mt-6 grid gap-5 lg:grid-cols-[1fr_.7fr]">
-          <article className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm lg:p-8"><p className="text-[11px] font-black uppercase tracking-[.2em] text-blue-600">Linha do tempo</p><h2 className="mt-2 text-2xl font-black">Meu relacionamento com a UVERGS</h2><div className="mt-6 space-y-5">{historico.map(([data,texto,tipo],i)=><div key={data+texto} className="flex gap-4"><div className="flex flex-col items-center"><span className={`h-3 w-3 rounded-full ${i===0?"bg-blue-600":"bg-slate-300"}`}/>{i<historico.length-1&&<span className="mt-1 h-full w-px bg-slate-200"/>}</div><div className="pb-3"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-800">{texto}</p><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold uppercase text-slate-500">{tipo}</span></div><p className="mt-1 text-xs text-slate-400">{data}</p></div></div>)}</div></article>
+          <article className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm lg:p-8"><p className="text-[11px] font-black uppercase tracking-[.2em] text-blue-600">Linha do tempo</p><h2 className="mt-2 text-2xl font-black">Meu relacionamento com a UVERGS</h2><div className="mt-6 space-y-5">{historico.map(([data,texto,tipo],i)=><div key={data+texto} className="flex gap-4"><div className="flex flex-col items-center"><span className={`h-3 w-3 rounded-full ${i===0?"bg-violet-600":"bg-slate-300"}`}/>{i<historico.length-1&&<span className="mt-1 h-full w-px bg-slate-200"/>}</div><div className="pb-3"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold text-slate-800">{texto}</p><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold uppercase text-slate-500">{tipo}</span></div><p className="mt-1 text-xs text-slate-400">{data}</p></div></div>)}</div></article>
           <article className="rounded-[30px] bg-gradient-to-br from-emerald-50 via-white to-cyan-50 p-6 ring-1 ring-emerald-100 lg:p-8"><p className="text-[11px] font-black uppercase tracking-[.2em] text-emerald-700">Meus certificados</p><h2 className="mt-2 text-2xl font-black">Tudo guardado em um só lugar.</h2><p className="mt-3 text-sm leading-relaxed text-slate-500">Acesse certificados emitidos pela UVERGS e seu histórico de participação sem precisar procurar e-mails antigos.</p><div className="mt-6 space-y-3"><div className="rounded-2xl border border-blue-100 bg-white p-5"><div className="flex items-center gap-4"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-xl">🎓</div><div className="flex-1"><p className="text-sm font-black">IA na Gestão Pública</p><p className="mt-1 text-xs text-slate-400">Exemplo pós-check-in</p></div><Link href="/portal/vereador/certificados/ia-gestao-publica" className="text-sm font-black text-blue-700">Abrir</Link></div></div><div className="rounded-2xl border border-emerald-100 bg-white p-5"><div className="flex items-center gap-4"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-xl">🎓</div><div className="flex-1"><p className="text-sm font-black">Encontro Regional das Missões</p><p className="mt-1 text-xs text-slate-400">Emitido em 03/08/2026</p></div><button className="text-sm font-black text-emerald-700">Abrir</button></div></div></div></article>
         </section>
 
