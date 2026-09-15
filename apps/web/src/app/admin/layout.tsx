@@ -8,6 +8,7 @@ const navItems = [
   { href: "/admin/growth", label: "Radar UVERGS", icon: "📡", exact: true },
   { href: "/admin/growth/territory", label: "Território RS", icon: "🗺️" },
   { href: "/admin/growth/campaigns", label: "Campanhas", icon: "🎯" },
+  { href: "/admin/growth/journeys", label: "Jornadas", icon: "⚡" },
   { href: "/admin/growth/profile", label: "Perfil 360º", icon: "✨" },
   { href: "/portal/vereador", label: "Meu UVERGS", icon: "🪪", badge: "PORTAL" },
   { href: "/portal/camara", label: "Portal da Câmara", icon: "🏛️", badge: "PORTAL" },
@@ -46,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-4 border-t border-white/10">
           <div className="rounded-2xl bg-white/10 border border-white/10 p-3">
             <p className="text-[10px] uppercase tracking-widest text-blue-200">Apresentação diretoria</p>
-            <p className="text-xs text-white font-semibold mt-1">Radar + portais conectados</p>
+            <p className="text-xs text-white font-semibold mt-1">Radar + jornadas + portais</p>
           </div>
           <p className="text-[10px] text-blue-300 mt-3">W9 Sistemas · UVERGS 360</p>
         </div>
