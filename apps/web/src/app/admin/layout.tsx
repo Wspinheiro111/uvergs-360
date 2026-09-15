@@ -10,6 +10,7 @@ const navItems = [
   { href: "/admin/growth/campaigns", label: "Campanhas", icon: "🎯" },
   { href: "/admin/growth/journeys", label: "Jornadas", icon: "⚡" },
   { href: "/admin/growth/events", label: "Evento 360", icon: "📊" },
+  { href: "/admin/growth/goals", label: "Metas & Impacto", icon: "📈", badge: "NOVO" },
   { href: "/admin/growth/checkin", label: "Check-in ao vivo", icon: "▦", badge: "EVENTO" },
   { href: "/admin/growth/profile", label: "Perfil 360º", icon: "✨" },
   { href: "/portal/vereador", label: "Meu UVERGS", icon: "🪪", badge: "PORTAL" },
@@ -40,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link key={item.href} href={item.href} className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${active ? "bg-white text-blue-900 shadow-lg" : "text-blue-100 hover:bg-white/10 hover:text-white"}`}>
                 <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm ${active ? "bg-blue-50" : "bg-white/5 group-hover:bg-white/10"}`}>{item.icon}</span>
                 <span className="flex-1">{item.label}</span>
-                {item.badge && <span className={`text-[8px] font-black rounded-full px-2 py-0.5 ${item.badge === "DEMO" ? "bg-emerald-400 text-emerald-950" : item.badge === "EVENTO" ? "bg-amber-300 text-amber-950" : "bg-cyan-300 text-cyan-950"}`}>{item.badge}</span>}
+                {item.badge && <span className={`text-[8px] font-black rounded-full px-2 py-0.5 ${item.badge === "DEMO" ? "bg-emerald-400 text-emerald-950" : item.badge === "EVENTO" ? "bg-amber-300 text-amber-950" : item.badge === "NOVO" ? "bg-violet-300 text-violet-950" : "bg-cyan-300 text-cyan-950"}`}>{item.badge}</span>}
               </Link>
             );
           })}
@@ -49,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-4 border-t border-white/10">
           <div className="rounded-2xl bg-white/10 border border-white/10 p-3">
             <p className="text-[10px] uppercase tracking-widest text-blue-200">Apresentação diretoria</p>
-            <p className="text-xs text-white font-semibold mt-1">Radar + jornada + evento + check-in</p>
+            <p className="text-xs text-white font-semibold mt-1">Radar + jornada + evento + metas</p>
           </div>
           <p className="text-[10px] text-blue-300 mt-3">W9 Sistemas · UVERGS 360</p>
         </div>
